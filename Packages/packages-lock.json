@@ -1,5 +1,26 @@
 {
   "dependencies": {
+    "barbaro.unity3d.auto": {
+      "version": "https://github.com/OranBar/AutoAttribute-for-Unity3d.git?path=Assets/Auto_Attribute",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "7d01744c594496b82d2d4223de1bd5ece6c199c3"
+    },
+    "barbaro.unity3d.oblib": {
+      "version": "https://github.com/OranBar/OBLib_Package_Unity3D.git?path=Assets/OB_Lib",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a214fddd4865632c3533382aff59b685de5c051f"
+    },
+    "com.dbrizov.naughtyattributes": {
+      "version": "https://github.com/dbrizov/NaughtyAttributes.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "8a8fa5a9659a6d63f196391c71e06c4286c8acd7"
+    },
     "com.unity.2d.animation": {
       "version": "7.0.4",
       "depth": 1,
