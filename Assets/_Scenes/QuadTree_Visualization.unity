@@ -279,8 +279,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c65e34a5a8cc334f84d1741d9341a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objs_to_spawn: 20
+  objs_to_spawn: 10
   obj_prefab: {fileID: 8702722825156357185, guid: 1737c29adc5d24140b3fa9646addcdcb, type: 3}
+  spawn_rate_frames: 5
 --- !u!114 &650938549
 MonoBehaviour:
   m_ObjectHideFlags: 0

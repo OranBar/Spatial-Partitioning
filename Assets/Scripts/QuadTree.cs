@@ -152,27 +152,51 @@ public class QuadTreeNode<T> {
             return false;
         }
 
-        if (elements.Count + 1 <= max_node_capacity)
+        // We might need to subdivide if this item fills our leaf to max capacity
+        if (IsSubdivided == false)
         {
-            elements.Add(obj);
-            return true;
-        }
-        else
-        {
-            if (IsSubdivided == false)
-            {
+            if(elements.Count + 1 > max_node_capacity){
                 Subdivide();
             }
+        }
 
+        // When subdivided, we add the elem to every sub quad. 
+        // If the element is not completely contained in a sub quad, 
+        // the Add will return false, and the element will be appended to 
+        // the elements list of the current node
+        if(IsSubdivided){
             if (TopLeft.Add(obj)) { return true; }
             if (TopRight.Add(obj)) { return true; }
             if (BottomLeft.Add(obj)) { return true; }
             if (BottomRight.Add(obj)) { return true; }
-
-            // If we're here, the object overlaps at least two of the sub quads.
-            elements.Add(obj);
-            return true;
         }
+
+        elements.Add(obj);
+        // If we're here, the object overlaps at least two of the sub quads.
+        return true;
+        
+
+        // if (elements.Count + 1 <= max_node_capacity)
+        // {
+        //     elements.Add(obj);
+        //     return true;
+        // }
+        // else
+        // {
+        //     if (IsSubdivided == false)
+        //     {
+        //         Subdivide();
+        //     }
+
+        //     if (TopLeft.Add(obj)) { return true; }
+        //     if (TopRight.Add(obj)) { return true; }
+        //     if (BottomLeft.Add(obj)) { return true; }
+        //     if (BottomRight.Add(obj)) { return true; }
+
+        //     // If we're here, the object overlaps at least two of the sub quads.
+        //     elements.Add(obj);
+        //     return true;
+        // }
     }
 
     public void Subdivide(){
@@ -187,10 +211,10 @@ public class QuadTreeNode<T> {
         // var bottom_left  = new Rect( new Vector2(this.area.Max.X, this.area.Min.Z), this.area.Center );
         // var bottom_right = new Rect( new Vector2(this.area.Min.X, this.area.Min.Z), this.area.Center );
 
-        subQuads[0] = new QuadTreeNode<T>(top_left);
-        subQuads[1] = new QuadTreeNode<T>(top_right);
-        subQuads[2] = new QuadTreeNode<T>(bottom_left);
-        subQuads[3] = new QuadTreeNode<T>(bottom_right);
+        subQuads[0] = new QuadTreeNode<T>(top_left, max_node_capacity);
+        subQuads[1] = new QuadTreeNode<T>(top_right, max_node_capacity);
+        subQuads[2] = new QuadTreeNode<T>(bottom_left, max_node_capacity);
+        subQuads[3] = new QuadTreeNode<T>(bottom_right, max_node_capacity);
         
         for (int i = this.elements.Count - 1; i >= 0 ; i--)
         {

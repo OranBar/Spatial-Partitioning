@@ -26,8 +26,24 @@ public class ObjectsSpawner : MonoBehaviour
         }
     }
     
-    void Start(){
-        //SpawnObjects();
+    [Button]
+    void SpawnSingleObject(Vector3 targetPos)
+    {
+        GameObject new_go = Instantiate(obj_prefab, targetPos, Quaternion.identity, this.transform);
+        OnObjectSpawned.Invoke(new_go);
+    }
+
+
+    public int spawn_rate_frames = 40;
+    
+    void Update(){
+        if(Input.GetMouseButton(0)){
+            if(Time.frameCount % spawn_rate_frames == 0){
+                var world_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                world_pos.z = 0f;
+                SpawnSingleObject(world_pos);
+            }
+        }
     }
 
 }

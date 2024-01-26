@@ -15,7 +15,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     void Awake()
     {
         Rect bounds = new Rect(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x );
-        quadTree = new QuadTree<GameObject>(bounds, 10, 8);
+        quadTree = new QuadTree<GameObject>(bounds, 4, 8);
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToQuadTree;
     }
