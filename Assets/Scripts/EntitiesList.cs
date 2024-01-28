@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using OBLib.QuadTree;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ public class EntitiesList : MonoBehaviour
     public bool activate_search;
     public Collider2D search_collider;
 
+    [ShowNativeProperty]
+    public int Objects_count => objects?.Count ?? 0;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -24,8 +28,7 @@ public class EntitiesList : MonoBehaviour
     }
 
     void AddSpawnedObj_ToQuadTree(GameObject obj){
-        Debug.Log("Add Spawned Obj");
-		objects.Add(obj);
+        objects.Add(obj);
     }
 
     private List<GameObject> prev_search_results = new List<GameObject>();
@@ -36,13 +39,17 @@ public class EntitiesList : MonoBehaviour
             LinearSearch();
         }
     }
-    
+
+    public int search_iterations = 0;
+
 	private List<GameObject> Search(Square search_area){
 		List<GameObject> result = new List<GameObject>();
+        search_iterations = 0;
 		foreach(var c_obj in objects){
 			if(search_area.Intersects((Vector2)c_obj.transform.position, c_obj.transform.lossyScale.x/2f )){
 				result.Add(c_obj);
 			}
+            search_iterations++;
 		}
 
 		return result;

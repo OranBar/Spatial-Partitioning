@@ -13,17 +13,6 @@ namespace OBLib.QuadTree
 
     }
 
-    // public struct Vector2 {
-    //     public float X;
-    //     public float Y;
-
-    //     public Vector2(float x, float y)
-    //     {
-    //         this.x = x;
-    //         this.y = y;
-    //     }
-    // }
-
     public class Square {
         public Vector2 center;
         public float halfExtents;
@@ -69,7 +58,6 @@ namespace OBLib.QuadTree
         public Square(Vector2 top, Vector2 bottom){
 
             // I'm assuming all Quads are squares
-
             this.halfExtents = Mathf.Abs(top.x - bottom.x) / 2;
             this.center = new Vector2((top.x + bottom.x)/2, (top.y + bottom.y)/2);
         }
@@ -141,6 +129,7 @@ namespace OBLib.QuadTree
         public Square area;
         private QuadTreeNode<T>[] subQuads = new QuadTreeNode<T>[]{null, null, null, null};
         private List<QuadTree_TrackedObj<T>> node_elements;
+        // TODO: The nodes all save a max_capacity variable. It's a waste of space
         private int max_node_capacity;
         
         public List<T> All_Elements {
@@ -292,11 +281,14 @@ namespace OBLib.QuadTree
 
         }
 
+        public int search__iterations = 0;
+
         public List<T> Search(Square search_area)
         {
             List<T> result = new List<T>();
 
             foreach(var c_elem in this.node_elements){
+                search__iterations++;
                 if(search_area.Intersects(c_elem.position, c_elem.radius)){
                     result.Add(c_elem.value);
                 }
@@ -305,6 +297,7 @@ namespace OBLib.QuadTree
             if(IsSubdivided){
                 foreach(var c_subquad in subQuads)
                 {
+                    search__iterations++;
                     if(search_area.Contains(c_subquad.area))
                     {
                         result.AddRange(c_subquad.All_Elements);
@@ -317,13 +310,8 @@ namespace OBLib.QuadTree
                         }
                     }
 
-                    // List<T> search_result = c_subquad.Search(search_area);
-                    // if(search_result != null && search_result.Count >= 1){
-                    //     result.AddRange(search_result);
-                    // }
                 }
             }
-
 
             // If we return a non-null list, it better have at least one element or I'll get mad
             if(result.Count == 0){
@@ -347,9 +335,8 @@ namespace OBLib.QuadTree
     {
         // public static readonly int MAX_NODE_CAPACITY = 10;
 
-
         public QuadTreeNode<T> root;
-        private int max_node_capacity;
+        // If we don't put a max_depth, the default behaviour is: No cell will be subdivided if it is smaller than the smallest element. No element will be placed in a cell that doesn't fully contain him. The lower bounds for the cell size is at least as big as the smallest object inserted in the quadtree.
         private int max_depth;
         private List<T> objects;
         public List<T>.Enumerator Objects { 
@@ -362,7 +349,7 @@ namespace OBLib.QuadTree
         public QuadTree(Square bounds, int max_node_capacity, int max_depth)
         {
             this.max_depth = max_depth;
-            this.max_node_capacity = max_node_capacity;
+            // this.max_node_capacity = max_node_capacity;
             this.root = new QuadTreeNode<T>(bounds, max_node_capacity);
         }
 
@@ -386,6 +373,7 @@ namespace OBLib.QuadTree
         }
 
         public List<T> Search(Square search_area){
+            this.root.search__iterations = 0;
             return this.root.Search(search_area);
         }
     }

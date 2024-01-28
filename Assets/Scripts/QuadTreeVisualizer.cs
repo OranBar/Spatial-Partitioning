@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using NaughtyAttributes;
 using OBLib.QuadTree;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ public class QuadTreeVisualizer : MonoBehaviour
 
     public bool activate_search;
     public Collider2D search_collider;
+
+    [ShowNativeProperty]
+    public int Search_iterations => quadTree?.root?.search__iterations ?? 0;
 
     // Start is called before the first frame update
     void Awake()
