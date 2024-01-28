@@ -124,8 +124,25 @@ namespace OBLib.QuadTree
     public class QuadTreeNode<T> {
         public Square area;
         private QuadTreeNode<T>[] subQuads = new QuadTreeNode<T>[]{null, null, null, null};
-        private List<QuadTree_TrackedObj<T>> elements;
+        private List<QuadTree_TrackedObj<T>> node_elements;
         private int max_node_capacity;
+        
+        public List<T> All_Elements {
+            get{
+                List<T> result = new List<T>();
+                foreach(var c_elem in node_elements){
+                    result.Add(c_elem.value);
+                }
+
+                if(IsSubdivided){
+                    foreach(var c_subquad in subQuads){
+                        result.AddRange(c_subquad.All_Elements);
+                    }
+                }
+
+                return result;
+            }
+        }
 
         public QuadTreeNode<T> TopLeft {
             get{
@@ -154,9 +171,9 @@ namespace OBLib.QuadTree
         }
 
         // This list is not always bounded. If there are many overlap elements, or if the max depth of the tree has been reached, we don't know in advance how many objects we'll need to store.
-        public List<QuadTree_TrackedObj<T>>.Enumerator Elements {
+        public List<QuadTree_TrackedObj<T>>.Enumerator Node_Elements {
             get{
-                return elements.GetEnumerator();
+                return node_elements.GetEnumerator();
             }
         }
 
@@ -168,7 +185,7 @@ namespace OBLib.QuadTree
 
         public QuadTreeNode(Square area, int max_node_capacity=10)
         {
-            elements = new List<QuadTree_TrackedObj<T>>(max_node_capacity);
+            node_elements = new List<QuadTree_TrackedObj<T>>(max_node_capacity);
             this.area = area;
             this.max_node_capacity = max_node_capacity;
         }
@@ -195,7 +212,7 @@ namespace OBLib.QuadTree
             // We might need to subdivide if this item fills our leaf to max capacity
             if (IsSubdivided == false)
             {
-                if(elements.Count + 1 > max_node_capacity){
+                if(node_elements.Count + 1 > max_node_capacity){
                     Subdivide();
                 }
             }
@@ -211,7 +228,7 @@ namespace OBLib.QuadTree
                 if (BottomRight.Add(obj)) { return true; }
             }
 
-            elements.Add(obj);
+            node_elements.Add(obj);
             // If we're here, the object overlaps at least two of the sub quads.
             return true;
 
@@ -251,12 +268,12 @@ namespace OBLib.QuadTree
             subQuads[2] = new QuadTreeNode<T>(bottom_left,  max_node_capacity);
             subQuads[3] = new QuadTreeNode<T>(bottom_right, max_node_capacity);
 
-            for (int i = this.elements.Count - 1; i >= 0 ; i--)
+            for (int i = this.node_elements.Count - 1; i >= 0 ; i--)
             {
-                var c_elem = this.elements[i];
+                var c_elem = this.node_elements[i];
                 foreach(var c_subquad in this.subQuads){
                     if(c_subquad.Add(c_elem)){
-                        this.elements.RemoveAt(i);
+                        this.node_elements.RemoveAt(i);
                         // TODO: this continue should continue the outer for, not the inner
                         continue;
                     }
@@ -267,27 +284,34 @@ namespace OBLib.QuadTree
 
         public List<T> Search(Square search_area)
         {
-            if(Contains(search_area) == false){
-                return null;
-            }
-            
             List<T> result = new List<T>();
 
-            if(IsSubdivided){
-                foreach(var c_subquad in subQuads){
-                    List<T> search_result = c_subquad.Search(search_area);
-                    if(search_result != null && search_result.Count >= 1){
-                        result.AddRange(search_result);
-                    }
-                }
-            }
-
-            // If we're here, it means the search_area overlaps 2 or more subquads. This is where we stop
-            foreach(var c_elem in this.elements){
+            foreach(var c_elem in this.node_elements){
                 if(search_area.Contains(c_elem.position, c_elem.radius)){
                     result.Add(c_elem.value);
                 }
             }
+            
+            if(IsSubdivided){
+                foreach(var c_subquad in subQuads){
+                    if(search_area.Contains(c_subquad.area)){
+                        result.AddRange(c_subquad.All_Elements);
+                    }
+
+                    if(c_subquad.area.Intersects(search_area)){
+                        List<T> recursive_search = c_subquad.Search(search_area); 
+                        if(recursive_search.IsNullOrEmpty() == false){
+                            result.AddRange(recursive_search);
+                        }
+                    }
+
+                    // List<T> search_result = c_subquad.Search(search_area);
+                    // if(search_result != null && search_result.Count >= 1){
+                    //     result.AddRange(search_result);
+                    // }
+                }
+            }
+
 
             // If we return a non-null list, it better have at least one element or I'll get mad
             if(result.Count == 0){
@@ -298,7 +322,7 @@ namespace OBLib.QuadTree
         }
 
         public void Clear(){
-            this.elements.Clear();
+            this.node_elements.Clear();
 
             foreach(QuadTreeNode<T> c_subquad in this.subQuads){
                 c_subquad.Clear();

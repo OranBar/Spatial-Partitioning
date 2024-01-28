@@ -7,6 +7,7 @@ using System;
 
 public class ObjectsSpawner : MonoBehaviour
 {
+    public bool spawn_on_start;
     public int objs_to_spawn;
     public GameObject obj_prefab;
 
@@ -14,6 +15,12 @@ public class ObjectsSpawner : MonoBehaviour
 
     [Auto]
     private BoxCollider2D spawnArea;
+
+    void Start(){
+        if(spawn_on_start){
+            SpawnObjects();
+        }
+    }
 
     [Button]
     void SpawnObjects()
