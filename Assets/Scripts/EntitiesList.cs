@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using NaughtyAttributes;
 using OBLib.QuadTree;
 using UnityEngine;
@@ -42,7 +43,15 @@ public class EntitiesList : MonoBehaviour
 
     public int search_iterations = 0;
 
+    List<long> search_time_measurements = new List<long>();
+
+    [ShowNativeProperty]
+    public double Search_Time_Average => search_time_measurements.Average();
+
 	private List<GameObject> Search(Square search_area){
+        var sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+        
 		List<GameObject> result = new List<GameObject>();
         search_iterations = 0;
 		foreach(var c_obj in objects){
@@ -52,6 +61,13 @@ public class EntitiesList : MonoBehaviour
             search_iterations++;
 		}
 
+        sw.Stop();
+        if(search_time_measurements.Count >= 60){
+            search_time_measurements.RemoveAt(0);
+        }
+        search_time_measurements.Add(sw.ElapsedMilliseconds);
+        UnityEngine.Debug.Log("QuadTree Search: " + sw.Elapsed);
+        
 		return result;
 	}
     

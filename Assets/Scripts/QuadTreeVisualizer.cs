@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using NaughtyAttributes;
 using OBLib.QuadTree;
 using UnityEngine;
@@ -30,7 +32,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     }
 
     void AddSpawnedObj_ToQuadTree(GameObject obj){
-        Debug.Log("Add Spawned Obj");
+        UnityEngine.Debug.Log("Add Spawned Obj");
         quadTree.Add(obj, new Vector2(obj.transform.position.x, obj.transform.position.y), obj.transform.lossyScale.x/2);
     }
 
@@ -39,24 +41,26 @@ public class QuadTreeVisualizer : MonoBehaviour
     public void Update(){
         if(activate_search)
         {
+            ClearPrevSearchColors(); 
             QuadTreeSearch();
         }
     }
     
+    List<long> search_time_measurements = new List<long>();
+
+    [ShowNativeProperty]
+    public double Search_Time_Average => search_time_measurements.Average();
+    
     private void QuadTreeSearch()
     {
+        var sw = new Stopwatch();
+        sw.Start();
+
         Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
         Square search_area = new Square(center, search_collider.bounds.extents.x);
 
         List<GameObject> results = quadTree.Search(search_area);
 
-        if (prev_search_results != null)
-        {
-            foreach (var c_result in prev_search_results)
-            {
-                c_result.GetComponent<SpriteRenderer>().color = Color.cyan;
-            }
-        }
 
         if (results != null)
         {
@@ -66,7 +70,25 @@ public class QuadTreeVisualizer : MonoBehaviour
             }
         }
 
+        sw.Stop();
+        if(search_time_measurements.Count >= 60){
+            search_time_measurements.RemoveAt(0);
+        }
+        search_time_measurements.Add(sw.ElapsedMilliseconds);
+        UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
+
         prev_search_results = results;
+    }
+
+    private void ClearPrevSearchColors(){
+        if (prev_search_results != null)
+        {
+            foreach (var c_result in prev_search_results)
+            {
+                c_result.GetComponent<SpriteRenderer>().color = Color.cyan;
+            }
+        }
+
     }
 
     void OnDrawGizmos(){

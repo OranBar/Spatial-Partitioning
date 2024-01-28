@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace OBLib.QuadTree 
 {
+    // If we save this pointer both in the quadtree and the list, then when this becomes null, it will become null in both containers. So I can remove by setting to null in the quadtree, and when I'll iterate, I can remove the nulls and prune/reshape the tree
     public class QuadTreeElementLocation {
 
     }
@@ -372,9 +374,14 @@ namespace OBLib.QuadTree
 
         }
 
+
         public List<T> Search(Square search_area){
             this.root.search__iterations = 0;
-            return this.root.Search(search_area);
+
+            var result =  this.root.Search(search_area);
+
+            return result;
+
         }
     }
 }
