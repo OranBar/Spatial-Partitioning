@@ -59,14 +59,15 @@ public class QuadTreeVisualizer : MonoBehaviour
         Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
         Square search_area = new Square(center, search_collider.bounds.extents.x);
 
-        List<GameObject> results = quadTree.Search(search_area);
+        IEnumerable<GameObject> results = quadTree.Search(search_area);
 
-
+        prev_search_results.Clear();
         if (results != null)
         {
             foreach (var c_result in results)
             {
                 c_result.GetComponent<SpriteRenderer>().color = Color.red;
+                prev_search_results.Add(c_result);
             }
         }
 
@@ -76,8 +77,6 @@ public class QuadTreeVisualizer : MonoBehaviour
         }
         search_time_measurements.Add(sw.ElapsedMilliseconds);
         UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
-
-        prev_search_results = results;
     }
 
     private void ClearPrevSearchColors(){
@@ -98,7 +97,7 @@ public class QuadTreeVisualizer : MonoBehaviour
 
         QuadTreeNode<GameObject> curr_node = quadTree.root;
 
-        Gizmos.color = Color.yellow;
+        Gizmos.color = new Color(Color.yellow.r, Color.yellow.g, Color.yellow.b, 0.4f);
 
         DrawQuad(curr_node);
     }

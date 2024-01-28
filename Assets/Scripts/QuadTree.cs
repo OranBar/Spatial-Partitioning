@@ -134,11 +134,11 @@ namespace OBLib.QuadTree
         // TODO: The nodes all save a max_capacity variable. It's a waste of space
         private int max_node_capacity;
         
-        public List<T> All_Elements {
+        public List<QuadTree_TrackedObj<T>> All_Elements {
             get{
-                List<T> result = new List<T>();
+                List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
                 foreach(var c_elem in node_elements){
-                    result.Add(c_elem.value);
+                    result.Add(c_elem);
                 }
 
                 if(IsSubdivided){
@@ -197,13 +197,13 @@ namespace OBLib.QuadTree
             this.max_node_capacity = max_node_capacity;
         }
 
-        public bool Add(T obj_to_add, Vector2 obj_pos, float obj_radius)
-        {
-            QuadTree_TrackedObj<T> quadtracked_obj = new QuadTree_TrackedObj<T>(obj_to_add, obj_pos, obj_radius);
-            return Add(quadtracked_obj);
-        }
+        // public bool Add(T obj_to_add, Vector2 obj_pos, float obj_radius)
+        // {
+        //     QuadTree_TrackedObj<T> quadtracked_obj = new QuadTree_TrackedObj<T>(obj_to_add, obj_pos, obj_radius);
+        //     return Add(quadtracked_obj);
+        // }
 
-        private bool Add(QuadTree_TrackedObj<T> obj)
+        public bool Add(QuadTree_TrackedObj<T> obj)
         {
             if (this.area.Contains(obj.position, obj.radius) == false)
             {
@@ -285,14 +285,14 @@ namespace OBLib.QuadTree
 
         public int search__iterations = 0;
 
-        public List<T> Search(Square search_area)
+        public List<QuadTree_TrackedObj<T>> Search(Square search_area)
         {
-            List<T> result = new List<T>();
+            List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
 
             foreach(var c_elem in this.node_elements){
                 search__iterations++;
                 if(search_area.Intersects(c_elem.position, c_elem.radius)){
-                    result.Add(c_elem.value);
+                    result.Add(c_elem);
                 }
             }
             
@@ -306,7 +306,7 @@ namespace OBLib.QuadTree
                     } 
                     else if(search_area.Intersects(c_subquad.area))
                     {
-                        List<T> recursive_search = c_subquad.Search(search_area); 
+                        List<QuadTree_TrackedObj<T>> recursive_search = c_subquad.Search(search_area); 
                         if(recursive_search.IsNullOrEmpty() == false){
                             result.AddRange(recursive_search);
                         }
@@ -326,8 +326,11 @@ namespace OBLib.QuadTree
         public void Clear(){
             this.node_elements.Clear();
 
-            foreach(QuadTreeNode<T> c_subquad in this.subQuads){
+            for (int i = 0; i < subQuads.Length; i++)
+            {
+                QuadTreeNode<T> c_subquad = this.subQuads[i];
                 c_subquad.Clear();
+                this.subQuads[i] = null;
             }
         }
     }
@@ -340,12 +343,7 @@ namespace OBLib.QuadTree
         public QuadTreeNode<T> root;
         // If we don't put a max_depth, the default behaviour is: No cell will be subdivided if it is smaller than the smallest element. No element will be placed in a cell that doesn't fully contain him. The lower bounds for the cell size is at least as big as the smallest object inserted in the quadtree.
         private int max_depth;
-        private List<T> objects;
-        public List<T>.Enumerator Objects { 
-            get{
-                return objects.GetEnumerator();
-            }
-        }
+        private List<QuadTree_TrackedObj<T>> objects;
 
 
         public QuadTree(Square bounds, int max_node_capacity, int max_depth)
@@ -357,13 +355,17 @@ namespace OBLib.QuadTree
 
 
 
-        public void Add(T objToAdd, Vector2 objPos, float objRadius)
+        public void Add(T obj_to_add, Vector2 obj_pos, float obj_radius)
         {
-            root.Add(objToAdd, objPos, objRadius);
+            QuadTree_TrackedObj<T> quadtracked_obj = new QuadTree_TrackedObj<T>(obj_to_add, obj_pos, obj_radius);
+            root.Add(quadtracked_obj);
         }
 
-        public void Remove(T objToRemove){
+        public void Remove(T obj_to_remove, Vector2 obj_pos, float obj_radius){
 
+            Square search_area = new Square(obj_pos, obj_radius);
+            List<QuadTree_TrackedObj<T>> quadtracked_obj = root.Search(search_area);
+            
         }
 
         public void Clear(){
@@ -374,14 +376,12 @@ namespace OBLib.QuadTree
 
         }
 
-
-        public List<T> Search(Square search_area){
+        public IEnumerable<T> Search(Square search_area){
             this.root.search__iterations = 0;
 
-            var result =  this.root.Search(search_area);
-
-            return result;
-
+            var result = this.root.Search(search_area);
+            
+            return result?.Select(elem => elem.value);
         }
     }
 }

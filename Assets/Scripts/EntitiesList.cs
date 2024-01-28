@@ -43,7 +43,7 @@ public class EntitiesList : MonoBehaviour
 
     public int search_iterations = 0;
 
-    List<long> search_time_measurements = new List<long>();
+    public List<long> search_time_measurements = new List<long>();
 
     [ShowNativeProperty]
     public double Search_Time_Average => search_time_measurements.Average();
