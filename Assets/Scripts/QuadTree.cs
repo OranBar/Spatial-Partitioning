@@ -78,10 +78,19 @@ namespace OBLib.QuadTree
                     center.y - radius >= corners[2].y && center.y + radius <= corners[0].y
                    );
         }
+        
+        public bool Intersects(Vector2 center, float radius){
+
+            Vector2[] corners = GetCorners();
+            return (
+                    center.x + radius >= corners[0].x && center.x - radius <= corners[1].x &&
+                    center.y + radius >= corners[2].y && center.y - radius <= corners[0].y
+                   );
+        }
 
         public bool Intersects(Square search_area)
         {
-            return Vector3.Distance(this.center, search_area.center) < this.halfExtents + search_area.halfExtents;
+            return Vector3.Distance(this.center, search_area.center) <= this.halfExtents + search_area.halfExtents;
         }
 
         public bool Contains(Square search_area)
@@ -287,7 +296,7 @@ namespace OBLib.QuadTree
             List<T> result = new List<T>();
 
             foreach(var c_elem in this.node_elements){
-                if(search_area.Contains(c_elem.position, c_elem.radius)){
+                if(search_area.Intersects(c_elem.position, c_elem.radius)){
                     result.Add(c_elem.value);
                 }
             }
