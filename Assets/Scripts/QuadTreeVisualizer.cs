@@ -20,7 +20,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        Square bounds = new Square(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x );
+        Square bounds = new Square(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x *5);
         quadTree = new QuadTree<GameObject>(bounds, 4, 8);
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToQuadTree;

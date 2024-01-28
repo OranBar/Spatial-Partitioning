@@ -201,12 +201,6 @@ namespace OBLib.QuadTree
 
         public bool Add(T obj_to_add, Vector2 obj_pos, float obj_radius)
         {
-            // Redundant check, but it might allows us to skip allocating the QuadTree_TrackedObj when unecessary.
-            if (this.area.Contains(obj_pos, obj_radius) == false)
-            {
-                return false;
-            }
-
             QuadTree_TrackedObj<T> quadtracked_obj = new QuadTree_TrackedObj<T>(obj_to_add, obj_pos, obj_radius);
             return Add(quadtracked_obj);
         }
