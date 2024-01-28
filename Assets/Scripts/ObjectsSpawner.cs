@@ -33,8 +33,11 @@ public class ObjectsSpawner : MonoBehaviour
         OnObjectSpawned.Invoke(new_go);
     }
 
+    public void Awake(){
+        Application.targetFrameRate = 30;
+    }
 
-    public int spawn_rate_frames = 40;
+    public int spawn_rate_frames = 4;
     
     void Update(){
         if(Input.GetMouseButton(0)){

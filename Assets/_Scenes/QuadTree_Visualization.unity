@@ -281,7 +281,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objs_to_spawn: 10
   obj_prefab: {fileID: 8702722825156357185, guid: 1737c29adc5d24140b3fa9646addcdcb, type: 3}
-  spawn_rate_frames: 5
+  spawn_rate_frames: 2
 --- !u!114 &650938549
 MonoBehaviour:
   m_ObjectHideFlags: 0
