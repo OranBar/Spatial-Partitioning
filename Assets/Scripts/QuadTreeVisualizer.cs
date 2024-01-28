@@ -28,7 +28,7 @@ public class QuadTreeVisualizer : MonoBehaviour
 
     void AddSpawnedObj_ToQuadTree(GameObject obj){
         Debug.Log("Add Spawned Obj");
-        quadTree.Add(obj, new Vector2(obj.transform.position.x, obj.transform.position.y), obj.transform.lossyScale.x);
+        quadTree.Add(obj, new Vector2(obj.transform.position.x, obj.transform.position.y), obj.transform.lossyScale.x/2);
     }
 
     private List<GameObject> prev_search_results = new List<GameObject>();

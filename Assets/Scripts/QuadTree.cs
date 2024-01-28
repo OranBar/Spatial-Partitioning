@@ -28,6 +28,11 @@ namespace OBLib.QuadTree
         public Vector2 center;
         public float halfExtents;
 
+        public float X_min => center.x - halfExtents;
+        public float X_max => center.x + halfExtents;
+        public float Y_min => center.y - halfExtents;
+        public float Y_max => center.y + halfExtents;
+
         public Vector2 TopLeft {
             get{
                 return new Vector2(this.center.x - this.halfExtents, this.center.y + halfExtents);
@@ -88,9 +93,11 @@ namespace OBLib.QuadTree
                    );
         }
 
-        public bool Intersects(Square search_area)
+        public bool Intersects(Square other)
         {
-            return Vector3.Distance(this.center, search_area.center) <= this.halfExtents + search_area.halfExtents;
+            //TODO: I think this doesn't work
+            return other.X_max > this.X_min && other.X_min < this.X_max &&
+                other.Y_max > this.Y_min && other.Y_min < this.Y_max;
         }
 
         public bool Contains(Square search_area)
@@ -296,12 +303,14 @@ namespace OBLib.QuadTree
             }
             
             if(IsSubdivided){
-                foreach(var c_subquad in subQuads){
-                    if(search_area.Contains(c_subquad.area)){
+                foreach(var c_subquad in subQuads)
+                {
+                    if(search_area.Contains(c_subquad.area))
+                    {
                         result.AddRange(c_subquad.All_Elements);
-                    }
-
-                    if(c_subquad.area.Intersects(search_area)){
+                    } 
+                    else if(search_area.Intersects(c_subquad.area))
+                    {
                         List<T> recursive_search = c_subquad.Search(search_area); 
                         if(recursive_search.IsNullOrEmpty() == false){
                             result.AddRange(recursive_search);
