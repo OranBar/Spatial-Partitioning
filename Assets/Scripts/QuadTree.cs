@@ -117,12 +117,14 @@ namespace OBLib.QuadTree
         public T value;
         public Vector2 position;
         public float radius;
+        public bool was_destroyed;
 
         public QuadTree_TrackedObj(T obj, Vector2 objPos, float objRadius)
         {
             this.value = obj;
             this.position = objPos;
             this.radius = objRadius;
+            this.was_destroyed = false;
         }
     }
 
@@ -186,6 +188,7 @@ namespace OBLib.QuadTree
 
         public bool IsSubdivided { 
             get{
+                // It should never be the case that one subquad is null, while the other are not null. So I can get away with checking just 1 out of the 4 subquads. 
                 return subQuads[3] != null;
             }
         }
@@ -235,11 +238,31 @@ namespace OBLib.QuadTree
 
         }
         
-        public bool Remove(T obj_to_remove, Vector2 obj_pos, float obj_radius){
+        public QuadTree_TrackedObj<T> Remove(T obj_to_remove, Vector2 obj_pos, float obj_radius){
             // We need to use the QuadTreeElementLocation to find the list from which we need to remove the element.
             // After removing, the tree might need to be pruned. This can be done now, or be deferred to the end of the frame.
 
-            return false;
+            for (int i = node_elements.Count - 1; i >= 0; i--)
+            {
+                QuadTree_TrackedObj<T> c_elem = this.node_elements[i];
+                if (c_elem.value.Equals(obj_to_remove)){
+                    var removed_elem = node_elements[i];
+                    node_elements.RemoveAt(i);
+
+                    return removed_elem;
+                }
+            }
+            
+            if(IsSubdivided){
+                foreach(var c_subquad in subQuads)
+                {
+                    if(c_subquad.Contains(obj_pos, obj_radius)){
+                        return c_subquad.Remove(obj_to_remove, obj_pos, obj_radius);
+                    }
+                }
+            }
+            
+            return null;
         }
 
         public bool Prune(){
@@ -247,7 +270,7 @@ namespace OBLib.QuadTree
             return false;
         }
         
-        public bool Contains(T obj, Vector2 obj_pos, float obj_radius){
+        public bool Contains(Vector2 obj_pos, float obj_radius){
             return this.area.Contains(obj_pos, obj_radius);
         }
 
@@ -311,7 +334,6 @@ namespace OBLib.QuadTree
                             result.AddRange(recursive_search);
                         }
                     }
-
                 }
             }
 
@@ -343,7 +365,20 @@ namespace OBLib.QuadTree
         public QuadTreeNode<T> root;
         // If we don't put a max_depth, the default behaviour is: No cell will be subdivided if it is smaller than the smallest element. No element will be placed in a cell that doesn't fully contain him. The lower bounds for the cell size is at least as big as the smallest object inserted in the quadtree.
         private int max_depth;
-        private List<QuadTree_TrackedObj<T>> objects;
+        private List<QuadTree_TrackedObj<T>> scene_objects;
+
+        public IEnumerable<T> Get_All_Scene_Objects() {
+            for (int i = scene_objects.Count - 1; i >= 0; i--)
+            {
+                var curr_obj = scene_objects[i];
+                if(curr_obj.was_destroyed == false){
+                    yield return curr_obj.value;
+                } else {
+                    // Ensure the scene_objects list is synched with the quadtree. Objects with the was_destroy bool set to true have been removed from the quadtree, while the removal from the scene_objects list was deferred until now
+                    scene_objects.RemoveAt(i);
+                }
+            }
+        }
 
 
         public QuadTree(Square bounds, int max_node_capacity, int max_depth)
@@ -359,21 +394,34 @@ namespace OBLib.QuadTree
         {
             QuadTree_TrackedObj<T> quadtracked_obj = new QuadTree_TrackedObj<T>(obj_to_add, obj_pos, obj_radius);
             root.Add(quadtracked_obj);
+            scene_objects.Add(quadtracked_obj);
         }
 
         public void Remove(T obj_to_remove, Vector2 obj_pos, float obj_radius){
 
-            Square search_area = new Square(obj_pos, obj_radius);
-            List<QuadTree_TrackedObj<T>> quadtracked_obj = root.Search(search_area);
-            
+            QuadTree_TrackedObj<T> removed_obj = root.Remove(obj_to_remove, obj_pos, obj_radius);
+            // List<QuadTree_TrackedObj<T>> quadtracked_objs = root.Search(search_area);
+
+            // When we loop over this object by iterating the scene_objects list, we will check this flag to decide if we need to remove it.
+            // This syncronizes the two data structures so they both ultimately contain the same objects
+            removed_obj.was_destroyed = true;
         }
 
         public void Clear(){
             root.Clear();
         }
 
-        public void Relocate(){
-
+        public void Relocate(T obj_to_relocate, Vector2 obj_prev_position, float obj_radius, Vector2 obj_next_position){
+            // First of all, remove
+            QuadTree_TrackedObj<T> elem_to_relocate = this.root.Remove(obj_to_relocate, obj_prev_position, obj_radius);
+            // Then, reinsert
+            if(elem_to_relocate == null){
+                throw new Exception("Element Not Found");
+            }
+            
+            elem_to_relocate.position = obj_next_position;
+            elem_to_relocate.was_destroyed = false; //This was set to true by the remove method. Flick it back
+            this.root.Add(elem_to_relocate);
         }
 
         public IEnumerable<T> Search(Square search_area){

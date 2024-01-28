@@ -11,8 +11,6 @@ public class EntitiesList : MonoBehaviour
 {
 	private List<GameObject> objects;
     [Auto]
-    private BoxCollider2D spawnArea;
-    [Auto]
     private ObjectsSpawner spawner;
 
     public bool activate_search;
@@ -97,9 +95,5 @@ public class EntitiesList : MonoBehaviour
         prev_search_results = results;
     }
 
-    void OnDrawGizmos(){
-        if(Application.isPlaying == false){ return; }
-
-    }
 
 }
