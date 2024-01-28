@@ -8,7 +8,6 @@ using Square = OBLib.QuadTree.Square;
 public class QuadTreeVisualizer : MonoBehaviour
 {
     public QuadTree<GameObject> quadTree;
-
     [Auto]
     private BoxCollider2D spawnArea;
     [Auto]
@@ -20,7 +19,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        Square bounds = new Square(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x *5);
+        Square bounds = new Square(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x + 1);
         quadTree = new QuadTree<GameObject>(bounds, 4, 8);
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToQuadTree;
@@ -34,28 +33,37 @@ public class QuadTreeVisualizer : MonoBehaviour
     private List<GameObject> prev_search_results = new List<GameObject>();
 
     public void Update(){
-        if(activate_search){
-            Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
-            Square search_area = new Square(center, search_collider.bounds.extents.x);
-
-            List<GameObject> results = quadTree.Search(search_area);
-            
-            if(prev_search_results != null){
-                foreach(var c_result in prev_search_results){
-                    c_result.GetComponent<SpriteRenderer>().color = Color.cyan;
-                }
-            }
-
-            if(results != null){
-                foreach(var c_result in results){
-                    c_result.GetComponent<SpriteRenderer>().color = Color.red;
-                }
-            }
-
-            prev_search_results = results;
+        if(activate_search)
+        {
+            QuadTreeSearch();
         }
     }
+    
+    private void QuadTreeSearch()
+    {
+        Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
+        Square search_area = new Square(center, search_collider.bounds.extents.x);
 
+        List<GameObject> results = quadTree.Search(search_area);
+
+        if (prev_search_results != null)
+        {
+            foreach (var c_result in prev_search_results)
+            {
+                c_result.GetComponent<SpriteRenderer>().color = Color.cyan;
+            }
+        }
+
+        if (results != null)
+        {
+            foreach (var c_result in results)
+            {
+                c_result.GetComponent<SpriteRenderer>().color = Color.red;
+            }
+        }
+
+        prev_search_results = results;
+    }
 
     void OnDrawGizmos(){
         if(Application.isPlaying == false){ return; }

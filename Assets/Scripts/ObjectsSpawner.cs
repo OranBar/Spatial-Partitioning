@@ -28,31 +28,33 @@ public class ObjectsSpawner : MonoBehaviour
         for (int i = 0; i < objs_to_spawn; i++)
         {
             Vector3 new_point = spawnArea.bounds.RandomPointInBounds();
-            GameObject new_go = Instantiate(obj_prefab, new_point, Quaternion.identity, this.transform);
-            OnObjectSpawned.Invoke(new_go);
+            GameObject new_go = SpawnSingleObject(new_point);
         }
     }
     
-    [Button]
-    void SpawnSingleObject(Vector3 targetPos)
+    GameObject SpawnSingleObject(Vector3 targetPos)
     {
         GameObject new_go = Instantiate(obj_prefab, targetPos, Quaternion.identity, this.transform);
         OnObjectSpawned.Invoke(new_go);
+        last_spawn_time = Time.time;
+        return new_go;
     }
 
     public void Awake(){
-        Application.targetFrameRate = 30;
+        Application.targetFrameRate = -1;
     }
 
-    public int spawn_rate_frames = 4;
+    public float last_spawn_time = 0;
+    public float spawn_cooldown = 0.10f;
     
     void Update(){
+        if(last_spawn_time + spawn_cooldown >= Time.time ){
+            return;
+        }
         if(Input.GetMouseButton(0)){
-            if(Time.frameCount % spawn_rate_frames == 0){
-                var world_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                world_pos.z = 0f;
-                SpawnSingleObject(world_pos);
-            }
+            var world_pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            world_pos.z = 0f;
+            SpawnSingleObject(world_pos);
         }
     }
 
