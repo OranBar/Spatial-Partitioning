@@ -265,8 +265,31 @@ namespace OBLib.QuadTree
             return null;
         }
 
+        // TODO: Honestly I doubt it's worth it to prune. We'll have to iterate all quads in the tree all the way down and back up again. My guess is that remaking the from scratch tree is faster, altho I could have more problems with allocations if I do that. 
         public bool Prune(){
+            bool can_prune_node = true;
+            if(TopLeft != null && TopLeft.node_elements.Count > 0){
+                can_prune_node = can_prune_node && TopLeft.Prune();
+                // can_prune_node = false;
+            }
+            if(TopRight != null && TopRight.node_elements.Count > 0){
+                can_prune_node = can_prune_node && TopRight.Prune();
+                // can_prune_node = false;
+            }
+            if(BottomLeft != null && BottomLeft.node_elements.Count > 0){
+                can_prune_node = can_prune_node && BottomLeft.Prune();
+                // can_prune_node = false;
+            }
+            if(BottomRight != null && BottomRight.node_elements.Count > 0){
+                can_prune_node = can_prune_node && BottomRight.Prune(); 
+                // can_prune_node = false;
+            }
 
+            if(can_prune_node){
+                this.Clear();
+                return true;
+            }
+            
             return false;
         }
         
@@ -285,6 +308,7 @@ namespace OBLib.QuadTree
             var top_left     = new Square( corners[0], this.area.center);
             var top_right    = new Square( corners[1], this.area.center);
             var bottom_left  = new Square( corners[2], this.area.center);
+
             var bottom_right = new Square( corners[3], this.area.center);
 
             subQuads[0] = new QuadTreeNode<T>(top_left,     max_node_capacity);
@@ -330,7 +354,7 @@ namespace OBLib.QuadTree
                     else if(search_area.Intersects(c_subquad.area))
                     {
                         List<QuadTree_TrackedObj<T>> recursive_search = c_subquad.Search(search_area); 
-                        if(recursive_search.IsNullOrEmpty() == false){
+                        if (recursive_search != null && recursive_search.Count > 0){
                             result.AddRange(recursive_search);
                         }
                     }
