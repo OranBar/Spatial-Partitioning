@@ -5,7 +5,6 @@ using NaughtyAttributes;
 using OBLib.QuadTree;
 using UnityEngine;
 
-using Square = OBLib.QuadTree.Square;
 
 public class EntitiesList : MonoBehaviour
 {
@@ -46,7 +45,7 @@ public class EntitiesList : MonoBehaviour
     [ShowNativeProperty]
     public double Search_Time_Average => search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
 
-	private List<GameObject> Search(Square search_area){
+	private List<GameObject> Search(Rectangle search_area){
         var sw = new System.Diagnostics.Stopwatch();
         sw.Start();
         
@@ -71,8 +70,9 @@ public class EntitiesList : MonoBehaviour
     
     private void LinearSearch()
     {
-        Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
-        Square search_area = new Square(center, search_collider.bounds.extents.x);
+        // Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
+        // Rectangle search_area = new Rectangle(center, search_collider.bounds.extents.x);
+        Rectangle search_area = new Rectangle(search_collider.bounds.min, search_collider.bounds.max);
 
 		List<GameObject> results = Search(search_area);
 
