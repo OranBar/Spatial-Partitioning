@@ -17,61 +17,33 @@ namespace OBLib.QuadTree
 
 	}
 
-	public class Square
+	public class Rectangle
 	{
-		public Vector2 center;
-		public float halfExtents;
+		public Vector2 Center => (min + max) / 2;
+		public Vector2 min;
+		public Vector2 max;
 
-		public float X_min => center.x - halfExtents;
-		public float X_max => center.x + halfExtents;
-		public float Y_min => center.y - halfExtents;
-		public float Y_max => center.y + halfExtents;
+		public Vector2 TopLeft => new Vector2(min.x, max.y);
+		public Vector2 TopRight => new Vector2(max.x, max.y);
+		public Vector2 BottomLeft => new Vector2(min.x, min.y);
+		public Vector2 BottomRight => new Vector2(max.x, min.y);
 
-		public Vector2 TopLeft
+		// public Square(Vector2 center, float halfSize)
+		// {
+		// 	this.center = center;
+		// 	this.halfSize = halfSize;
+		// }
+
+		public Rectangle(Vector2 min, Vector2 max)
 		{
-			get
-			{
-				return new Vector2(this.center.x - this.halfExtents, this.center.y + halfExtents);
-			}
+			this.min = min;
+			this.max = max;
 		}
-		public Vector2 TopRight
-		{
-			get
-			{
-				return new Vector2(this.center.x + this.halfExtents, this.center.y + halfExtents);
-			}
-		}
-
-		public Vector2 BottomLeft
-		{
-			get
-			{
-				return new Vector2(this.center.x + this.halfExtents, this.center.y - halfExtents);
-			}
-		}
-
-		public Vector2 BottomRight
-		{
-			get
-			{
-				return new Vector2(this.center.x - this.halfExtents, this.center.y - halfExtents);
-			}
-		}
-
-
-		public Square(Vector2 center, float halfExtents)
-		{
-			this.center = center;
-			this.halfExtents = halfExtents;
-		}
-
-		public Square(Vector2 top, Vector2 bottom)
-		{
-
-			// I'm assuming all Quads are squares
-			this.halfExtents = Mathf.Abs(top.x - bottom.x) / 2;
-			this.center = new Vector2((top.x + bottom.x) / 2, (top.y + bottom.y) / 2);
-		}
+		
+		public bool Equals(Rectangle other)
+        {
+            return this.min == other.min && this.max == other.max;
+        }
 
 		// Only returns true if the object is fully contained in the rect
 		public bool Contains(Vector2 center, float radius)
@@ -94,14 +66,13 @@ namespace OBLib.QuadTree
 				   );
 		}
 
-		public bool Intersects(Square other)
+		public bool Intersects(Rectangle other)
 		{
-			//TODO: I think this doesn't work
-			return other.X_max > this.X_min && other.X_min < this.X_max &&
-				other.Y_max > this.Y_min && other.Y_min < this.Y_max;
+			return other.max.x > this.min.x && other.min.x < this.max.x &&
+				other.max.y > this.min.y && other.min.y < this.max.y;
 		}
 
-		public bool Contains(Square search_area)
+		public bool Contains(Rectangle search_area)
 		{
 			bool x_contained = search_area.TopRight.x < this.TopRight.x && search_area.TopLeft.x > this.TopLeft.x;
 
@@ -144,7 +115,7 @@ namespace OBLib.QuadTree
 
 	public class QuadTreeNode<T>
 	{
-		public Square area;
+		public Rectangle area;
 		private QuadTreeNode<T>[] subQuads = new QuadTreeNode<T>[] { null, null, null, null };
 		private List<QuadTree_TrackedObj<T>> node_elements;
 
@@ -221,7 +192,7 @@ namespace OBLib.QuadTree
 			}
 		}
 
-		public QuadTreeNode(Square area)
+		public QuadTreeNode(Rectangle area)
 		{
 			node_elements = new List<QuadTree_TrackedObj<T>>();
 			this.area = area;
@@ -337,7 +308,7 @@ namespace OBLib.QuadTree
 			return this.area.Contains(obj_pos, obj_radius);
 		}
 
-		public bool Contains(Square search_area)
+		public bool Contains(Rectangle search_area)
 		{
 			return this.area.Contains(search_area);
 		}
@@ -346,11 +317,31 @@ namespace OBLib.QuadTree
 		{
 			Vector2[] corners = this.area.GetCorners();
 
-			var top_left = new Square(corners[0], this.area.center);
-			var top_right = new Square(corners[1], this.area.center);
-			var bottom_left = new Square(corners[2], this.area.center);
+			// TODO: This is incorrect. We need to pass min and max.
+			var top_left = new Rectangle(
+               new Vector2(this.area.min.x, this.area.Center.y),
+               new Vector2(this.area.Center.x, this.area.max.y)
+           );
 
-			var bottom_right = new Square(corners[3], this.area.center);
+            var top_right = new Rectangle(
+                new Vector2(this.area.Center.x, this.area.Center.y),
+                new Vector2(this.area.max.x, this.area.max.y)
+            );
+
+            var bottom_right = new Rectangle(
+                new Vector2(this.area.Center.x, this.area.min.y),
+                new Vector2(this.area.max.x, this.area.Center.y)
+            );
+
+            var bottom_left = new Rectangle(
+                new Vector2(this.area.min.x, this.area.min.y),
+                new Vector2(this.area.Center.x, this.area.Center.y)
+            );
+
+			// var top_left = new Rectangle(corners[0], this.area.Center);
+			// var top_right = new Rectangle(corners[1], this.area.Center);
+			// var bottom_left = new Rectangle(corners[2], this.area.Center);
+			// var bottom_right = new Rectangle(corners[3], this.area.Center);
 
 			subQuads[0] = new QuadTreeNode<T>(top_left);
 			subQuads[1] = new QuadTreeNode<T>(top_right);
@@ -366,7 +357,8 @@ namespace OBLib.QuadTree
 					{
 						this.node_elements.RemoveAt(i);
 						// TODO: this continue should continue the outer for, not the inner
-						continue;
+						// continue;
+						break;
 					}
 				}
 			}
@@ -374,7 +366,7 @@ namespace OBLib.QuadTree
 		}
 
 
-		public List<QuadTree_TrackedObj<T>> Search(Square search_area)
+		public List<QuadTree_TrackedObj<T>> Search(Rectangle search_area)
 		{
 			List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
 
@@ -460,7 +452,7 @@ namespace OBLib.QuadTree
 		}
 
 
-		public QuadTree(Square bounds, int max_depth)
+		public QuadTree(Rectangle bounds, int max_depth)
 		{
 			this.max_depth = max_depth;
 			this.root = new QuadTreeNode<T>(bounds);
@@ -512,7 +504,7 @@ namespace OBLib.QuadTree
             this.root.Add(elem_to_relocate);
         }
 
-		public IEnumerable<T> Search(Square search_area)
+		public IEnumerable<T> Search(Rectangle search_area)
 		{
 			Stats.search_iterations = 0;
 
