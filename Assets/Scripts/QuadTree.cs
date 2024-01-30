@@ -48,22 +48,26 @@ namespace OBLib.QuadTree
 		// Only returns true if the object is fully contained in the rect
 		public bool Contains(Vector2 center, float radius)
 		{
+			return center.x - radius >= min.x && center.x + radius <= max.x
+				&& center.y - radius >= min.y && center.y + radius <= max.y;
 
-			Vector2[] corners = GetCorners();
-			return (
-					center.x - radius >= corners[0].x && center.x + radius <= corners[1].x &&
-					center.y - radius >= corners[2].y && center.y + radius <= corners[0].y
-				   );
+			// Vector2[] corners = GetCorners();
+			// return (
+			// 		center.x - radius >= corners[0].x && center.x + radius <= corners[1].x &&
+			// 		center.y - radius >= corners[2].y && center.y + radius <= corners[0].y
+			// 	   );
 		}
 
 		public bool Intersects(Vector2 center, float radius)
 		{
+			return center.x + radius >= min.x && center.x - radius <= max.x
+				&& center.y + radius >= min.y && center.y - radius <= max.y;
 
-			Vector2[] corners = GetCorners();
-			return (
-					center.x + radius >= corners[0].x && center.x - radius <= corners[1].x &&
-					center.y + radius >= corners[2].y && center.y - radius <= corners[0].y
-				   );
+			// Vector2[] corners = GetCorners();
+			// return (
+			// 		center.x + radius >= corners[0].x && center.x - radius <= corners[1].x &&
+			// 		center.y + radius >= corners[2].y && center.y - radius <= corners[0].y
+			// 	   );
 		}
 
 		public bool Intersects(Rectangle other)
@@ -315,7 +319,6 @@ namespace OBLib.QuadTree
 
 		public void Subdivide()
 		{
-			Vector2[] corners = this.area.GetCorners();
 
 			// TODO: This is incorrect. We need to pass min and max.
 			var top_left = new Rectangle(
