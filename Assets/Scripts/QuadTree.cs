@@ -50,24 +50,12 @@ namespace OBLib.QuadTree
 		{
 			return center.x - radius >= min.x && center.x + radius <= max.x
 				&& center.y - radius >= min.y && center.y + radius <= max.y;
-
-			// Vector2[] corners = GetCorners();
-			// return (
-			// 		center.x - radius >= corners[0].x && center.x + radius <= corners[1].x &&
-			// 		center.y - radius >= corners[2].y && center.y + radius <= corners[0].y
-			// 	   );
 		}
 
 		public bool Intersects(Vector2 center, float radius)
 		{
 			return center.x + radius >= min.x && center.x - radius <= max.x
 				&& center.y + radius >= min.y && center.y - radius <= max.y;
-
-			// Vector2[] corners = GetCorners();
-			// return (
-			// 		center.x + radius >= corners[0].x && center.x - radius <= corners[1].x &&
-			// 		center.y + radius >= corners[2].y && center.y - radius <= corners[0].y
-			// 	   );
 		}
 
 		public bool Intersects(Rectangle other)
@@ -91,8 +79,8 @@ namespace OBLib.QuadTree
 
 			result[0] = TopLeft;
 			result[1] = TopRight;
-			result[2] = BottomLeft;
-			result[3] = BottomRight;
+			result[2] = BottomRight;
+			result[3] = BottomLeft;
 
 			return result;
 		}
