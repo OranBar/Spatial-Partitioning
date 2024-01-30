@@ -492,20 +492,22 @@ namespace OBLib.QuadTree
 			root.Clear();
 		}
 
-		public void Relocate(T obj_to_relocate, Vector2 obj_prev_position, float obj_radius, Vector2 obj_next_position)
-		{
-			// First of all, remove
-			QuadTree_TrackedObj<T> elem_to_relocate = this.root.Remove(obj_to_relocate, obj_prev_position, obj_radius);
-			// Then, reinsert
-			if (elem_to_relocate == null)
-			{
-				throw new Exception("Element Not Found");
-			}
+		public void Relocate(T obj_to_relocate, Vector2 curr_obj_pos, Vector2 obj_displacement, float obj_radius)
+        {
+            // First of all, remove
+            QuadTree_TrackedObj<T> elem_to_relocate = this.root.Remove( obj_to_relocate, curr_obj_pos, obj_radius);
 
-			elem_to_relocate.position = obj_next_position;
-			elem_to_relocate.was_destroyed = false; //This was set to true by the remove method. Flick it back
-			this.root.Add(elem_to_relocate);
-		}
+            //QuadTree_TrackedObj<T> elem_to_relocate = this.root.Remove(obj_to_relocate, obj_prev_position, obj_radius);
+            // Then, reinsert
+            if (elem_to_relocate == null)
+            {
+                throw new Exception("Element Not Found");
+            }
+
+            elem_to_relocate.position = elem_to_relocate.position + obj_displacement;
+            elem_to_relocate.was_destroyed = false; //This was set to true by the remove method. Flick it back
+            this.root.Add(elem_to_relocate);
+        }
 
 		public IEnumerable<T> Search(Square search_area)
 		{

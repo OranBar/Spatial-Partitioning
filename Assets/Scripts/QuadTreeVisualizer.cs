@@ -49,7 +49,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     List<long> search_time_measurements = new List<long>();
 
     [ShowNativeProperty]
-    public double Search_Time_Average => search_time_measurements.Average();
+    public double Search_Time_Average => search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
     
     private void QuadTreeSearch()
     {
@@ -88,6 +88,31 @@ public class QuadTreeVisualizer : MonoBehaviour
             }
         }
 
+    }
+
+
+    private Transform random_obj;
+    [Button]
+    public void Select(){
+        if(random_obj != null){
+            random_obj.GetComponent<SpriteRenderer>().color = Color.cyan;
+        }
+        random_obj = this.transform.GetChildren().GetRandomElement();
+        random_obj.GetComponent<SpriteRenderer>().color = Color.yellow;
+    }
+
+    [Button]
+    public void TestRemove(){
+        quadTree.Remove(random_obj.gameObject, random_obj.position, random_obj.lossyScale.x/2f);
+        random_obj.GetComponent<SpriteRenderer>().color = Color.gray;
+    }
+    
+    [Button]
+    public void TestRelocate(){
+        quadTree.Relocate(random_obj.gameObject, random_obj.position, Vector2.up, random_obj.lossyScale.x/2f);
+        var new_obj = Instantiate(random_obj, this.transform);
+        random_obj.transform.Translate(Vector2.up);
+        // random_obj.GetComponent<SpriteRenderer>().color = Color.green;
     }
 
     void OnDrawGizmos(){
