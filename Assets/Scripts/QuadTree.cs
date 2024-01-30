@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using VRageMath;
 // using VRageMath;
+
 
 namespace OBLib.QuadTree
 {
@@ -417,11 +417,14 @@ namespace OBLib.QuadTree
 		{
 			this.node_elements.Clear();
 
-			for (int i = 0; i < subQuads.Length; i++)
+			if (this.IsSubdivided)
 			{
-				QuadTreeNode<T> c_subquad = this.subQuads[i];
-				c_subquad.Clear();
-				this.subQuads[i] = null;
+				for (int i = 0; i < subQuads.Length; i++)
+				{
+					QuadTreeNode<T> c_subquad = this.subQuads[i];
+					c_subquad.Clear();
+					this.subQuads[i] = null;
+				}
 			}
 		}
 	}
