@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NaughtyAttributes;
 using UnityEngine;
 // using VRageMath;
 
 
 namespace OBLib.QuadTree
 {
+	public class Stats{
+		public static int search_iterations;
+	}
 	// If we save this pointer both in the quadtree and the list, then when this becomes null, it will become null in both containers. So I can remove by setting to null in the quadtree, and when I'll iterate, I can remove the nulls and prune/reshape the tree
 	public class QuadTreeElementLocation
 	{
@@ -268,6 +272,17 @@ namespace OBLib.QuadTree
 			// We need to use the QuadTreeElementLocation to find the list from which we need to remove the element.
 			// After removing, the tree might need to be pruned. This can be done now, or be deferred to the end of the frame.
 
+			if (IsSubdivided)
+			{
+				foreach (var c_subquad in subQuads)
+				{
+					if (c_subquad.Contains(obj_pos, obj_radius))
+					{
+						return c_subquad.Remove(obj_to_remove, obj_pos, obj_radius);
+					}
+				}
+			}
+
 			for (int i = node_elements.Count - 1; i >= 0; i--)
 			{
 				QuadTree_TrackedObj<T> c_elem = this.node_elements[i];
@@ -277,17 +292,6 @@ namespace OBLib.QuadTree
 					node_elements.RemoveAt(i);
 
 					return removed_elem;
-				}
-			}
-
-			if (IsSubdivided)
-			{
-				foreach (var c_subquad in subQuads)
-				{
-					if (c_subquad.Contains(obj_pos, obj_radius))
-					{
-						return c_subquad.Remove(obj_to_remove, obj_pos, obj_radius);
-					}
 				}
 			}
 
@@ -369,26 +373,16 @@ namespace OBLib.QuadTree
 
 		}
 
-		public int search__iterations = 0;
 
 		public List<QuadTree_TrackedObj<T>> Search(Square search_area)
 		{
 			List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
 
-			foreach (var c_elem in this.node_elements)
-			{
-				search__iterations++;
-				if (search_area.Intersects(c_elem.position, c_elem.radius))
-				{
-					result.Add(c_elem);
-				}
-			}
-
 			if (IsSubdivided)
 			{
 				foreach (var c_subquad in subQuads)
 				{
-					search__iterations++;
+					Stats.search_iterations++;
 					if (search_area.Contains(c_subquad.area))
 					{
 						result.AddRange(c_subquad.All_Elements);
@@ -404,6 +398,15 @@ namespace OBLib.QuadTree
 				}
 			}
 
+			foreach (var c_elem in this.node_elements)
+			{
+				Stats.search_iterations++;
+				if (search_area.Intersects(c_elem.position, c_elem.radius))
+				{
+					result.Add(c_elem);
+				}
+			}
+			
 			// If we return a non-null list, it better have at least one element or I'll get mad
 			if (result.Count == 0)
 			{
@@ -511,9 +514,10 @@ namespace OBLib.QuadTree
 
 		public IEnumerable<T> Search(Square search_area)
 		{
-			this.root.search__iterations = 0;
+			Stats.search_iterations = 0;
 
 			var result = this.root.Search(search_area);
+			Debug.Log(Stats.search_iterations);
 
 			return result?.Select(elem => elem.value);
 		}

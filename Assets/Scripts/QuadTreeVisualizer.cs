@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +21,8 @@ public class QuadTreeVisualizer : MonoBehaviour
     public Collider2D search_collider;
 
     [ShowNativeProperty]
-    public int Search_iterations => quadTree?.root?.search__iterations ?? 0;
+    public int search_iterations => Stats.search_iterations;
+
 
     // Start is called before the first frame update
     void Awake()
@@ -51,7 +53,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     [ShowNativeProperty]
     public double Search_Time_Average => search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
     
-    private void QuadTreeSearch()
+    private List<GameObject> QuadTreeSearch()
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -76,7 +78,8 @@ public class QuadTreeVisualizer : MonoBehaviour
             search_time_measurements.RemoveAt(0);
         }
         search_time_measurements.Add(sw.ElapsedMilliseconds);
-        UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
+        return prev_search_results;
+        // UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
     }
 
     private void ClearPrevSearchColors(){
@@ -99,6 +102,7 @@ public class QuadTreeVisualizer : MonoBehaviour
         }
         random_obj = this.transform.GetChildren().GetRandomElement();
         random_obj.GetComponent<SpriteRenderer>().color = Color.yellow;
+        UnityEngine.Debug.Log(Stats.search_iterations);
     }
 
     [Button]
@@ -113,6 +117,20 @@ public class QuadTreeVisualizer : MonoBehaviour
         var new_obj = Instantiate(random_obj, this.transform);
         random_obj.transform.Translate(Vector2.up);
         // random_obj.GetComponent<SpriteRenderer>().color = Color.green;
+    }
+
+    [Button]
+    public void TestSearch(){
+        var results = QuadTreeSearch();
+    }
+    
+    [Button]
+    public void TestRemoveArea(){
+        var results = QuadTreeSearch();
+        foreach(var c_result in results){
+            quadTree.Remove(c_result, c_result.transform.position, c_result.transform.lossyScale.x / 2);
+
+        }
     }
 
     void OnDrawGizmos(){

@@ -44,7 +44,7 @@ public class EntitiesList : MonoBehaviour
     public List<long> search_time_measurements = new List<long>();
 
     [ShowNativeProperty]
-    public double Search_Time_Average => search_time_measurements.Average();
+    public double Search_Time_Average => search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
 
 	private List<GameObject> Search(Square search_area){
         var sw = new System.Diagnostics.Stopwatch();
