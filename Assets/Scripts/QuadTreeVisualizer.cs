@@ -26,7 +26,6 @@ public class QuadTreeVisualizer : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        // Rectangle bounds = new Rectangle(new Vector2(spawnArea.bounds.center.x, spawnArea.bounds.center.y), spawnArea.bounds.extents.x + 1);
         Rectangle bounds = new Rectangle(spawnArea.bounds.min, spawnArea.bounds.max);
         quadTree = new QuadTree<GameObject>(bounds, 4);
 
@@ -58,7 +57,6 @@ public class QuadTreeVisualizer : MonoBehaviour
         var sw = new Stopwatch();
         sw.Start();
 
-        // Vector2 center = new Vector2(search_collider.bounds.center.x, search_collider.bounds.center.y);
         Rectangle search_area = new Rectangle(search_collider.bounds.min, search_collider.bounds.max);
 
         IEnumerable<GameObject> results = quadTree.Search(search_area);

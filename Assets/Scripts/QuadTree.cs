@@ -12,10 +12,10 @@ namespace OBLib.QuadTree
 		public static int search_iterations;
 	}
 	// If we save this pointer both in the quadtree and the list, then when this becomes null, it will become null in both containers. So I can remove by setting to null in the quadtree, and when I'll iterate, I can remove the nulls and prune/reshape the tree
-	public class QuadTreeElementLocation
-	{
+	// public class QuadTreeElementLocation
+	// {
 
-	}
+	// }
 
 	public class Rectangle
 	{
@@ -28,11 +28,6 @@ namespace OBLib.QuadTree
 		public Vector2 BottomLeft => new Vector2(min.x, min.y);
 		public Vector2 BottomRight => new Vector2(max.x, min.y);
 
-		// public Square(Vector2 center, float halfSize)
-		// {
-		// 	this.center = center;
-		// 	this.halfSize = halfSize;
-		// }
 
 		public Rectangle(Vector2 min, Vector2 max)
 		{
@@ -261,7 +256,7 @@ namespace OBLib.QuadTree
 			return null;
 		}
 
-		// TODO: Honestly I doubt it's worth it to prune. We'll have to iterate all quads in the tree all the way down and back up again. My guess is that remaking the from scratch tree is faster, altho I could have more problems with allocations if I do that. 
+		// TODO: Honestly I doubt it's worth it to prune. We'll have to iterate all quads in the tree all the way down and back up again. My guess is that remaking the from scratch tree is faster/good enough, altho I could have more problems with allocations if I do that. 
 		public bool Prune()
 		{
 			bool can_prune_node = true;
@@ -328,11 +323,6 @@ namespace OBLib.QuadTree
                 new Vector2(this.area.min.x, this.area.min.y),
                 new Vector2(this.area.Center.x, this.area.Center.y)
             );
-
-			// var top_left = new Rectangle(corners[0], this.area.Center);
-			// var top_right = new Rectangle(corners[1], this.area.Center);
-			// var bottom_left = new Rectangle(corners[2], this.area.Center);
-			// var bottom_right = new Rectangle(corners[3], this.area.Center);
 
 			subQuads[0] = new QuadTreeNode<T>(top_left);
 			subQuads[1] = new QuadTreeNode<T>(top_right);
