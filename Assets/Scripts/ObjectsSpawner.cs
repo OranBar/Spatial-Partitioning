@@ -14,7 +14,7 @@ public class ObjectsSpawner : MonoBehaviour
     public event Action<GameObject> OnObjectSpawned = ( _ ) => { };
 
     [Auto]
-    private BoxCollider2D spawnArea;
+    private Collider spawnArea;
 
     void Start(){
         if(spawn_on_start){

@@ -20,7 +20,7 @@ public class QuadTreeVisualizer : MonoBehaviour
     public Collider2D search_collider;
 
     [ShowNativeProperty]
-    public int search_iterations => Stats.search_iterations;
+    public int search_iterations => Stats.subquad_iterations;
 
 
     // Start is called before the first frame update
@@ -100,13 +100,14 @@ public class QuadTreeVisualizer : MonoBehaviour
         }
         random_obj = this.transform.GetChildren().GetRandomElement();
         random_obj.GetComponent<SpriteRenderer>().color = Color.yellow;
-        UnityEngine.Debug.Log(Stats.search_iterations);
+        UnityEngine.Debug.Log(Stats.subquad_iterations);
     }
 
     [Button]
     public void TestRemove(){
         quadTree.Remove(random_obj.gameObject, random_obj.position, random_obj.lossyScale.x/2f);
         random_obj.GetComponent<SpriteRenderer>().color = Color.gray;
+        random_obj = null;
     }
     
     [Button]

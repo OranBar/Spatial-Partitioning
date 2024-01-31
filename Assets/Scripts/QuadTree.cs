@@ -9,8 +9,37 @@ using UnityEngine;
 namespace OBLib.QuadTree
 {
 	public class Stats{
-		public static int search_iterations;
-	}
+		public static int subquad_iterations;
+        public static int contains_rect_checks;
+        public static int intersects_rect_checks;
+        public static int intersects_points_checks;
+        public static int contains_points_checks;
+        public static int node_iterations;
+		public static int max_depth;
+        
+		public static void ResetStats(){
+			
+			subquad_iterations = 0;
+        	contains_rect_checks = 0;
+        	intersects_rect_checks = 0;
+        	intersects_points_checks = 0;
+        	contains_points_checks = 0;
+        	node_iterations = 0;
+			max_depth = 0;
+		}
+        
+		public new static string ToString(){
+			var rslt = "";
+			rslt += "search_iterations "+subquad_iterations;
+        	rslt += " - node_iterations " + node_iterations;
+        	rslt += " - max_depth " + max_depth+"\n";
+        	rslt += "contains_rect_checks "+contains_rect_checks+"\n";
+			rslt += "intersects_rect_checks " + intersects_rect_checks+"\n";
+        	rslt += "intersects_points_checks " + intersects_points_checks+"\n";
+        	rslt += "contains_points_checks " + contains_points_checks+"\n";
+			return rslt;
+		}
+    }
 	// If we save this pointer both in the quadtree and the list, then when this becomes null, it will become null in both containers. So I can remove by setting to null in the quadtree, and when I'll iterate, I can remove the nulls and prune/reshape the tree
 	// public class QuadTreeElementLocation
 	// {
@@ -43,24 +72,28 @@ namespace OBLib.QuadTree
 		// Only returns true if the object is fully contained in the rect
 		public bool Contains(Vector2 center, float radius)
 		{
+			Stats.contains_points_checks++;
 			return center.x - radius >= min.x && center.x + radius <= max.x
 				&& center.y - radius >= min.y && center.y + radius <= max.y;
 		}
 
 		public bool Intersects(Vector2 center, float radius)
 		{
+			Stats.intersects_points_checks++;
 			return center.x + radius >= min.x && center.x - radius <= max.x
 				&& center.y + radius >= min.y && center.y - radius <= max.y;
 		}
 
 		public bool Intersects(Rectangle other)
 		{
+			Stats.intersects_rect_checks++;
 			return other.max.x > this.min.x && other.min.x < this.max.x &&
 				other.max.y > this.min.y && other.min.y < this.max.y;
 		}
 
 		public bool Contains(Rectangle search_area)
 		{
+			Stats.contains_rect_checks++;
 			bool x_contained = search_area.TopRight.x < this.TopRight.x && search_area.TopLeft.x > this.TopLeft.x;
 
 			bool y_contained = search_area.TopRight.y < this.TopRight.y && search_area.BottomRight.y > this.BottomRight.y;
@@ -115,6 +148,7 @@ namespace OBLib.QuadTree
 				List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
 				foreach (var c_elem in node_elements)
 				{
+					Stats.node_iterations++;
 					result.Add(c_elem);
 				}
 
@@ -122,6 +156,7 @@ namespace OBLib.QuadTree
 				{
 					foreach (var c_subquad in subQuads)
 					{
+						Stats.subquad_iterations++;
 						result.AddRange(c_subquad.All_Elements);
 					}
 				}
@@ -302,7 +337,6 @@ namespace OBLib.QuadTree
 
 		public void Subdivide()
 		{
-
 			// TODO: This is incorrect. We need to pass min and max.
 			var top_left = new Rectangle(
                new Vector2(this.area.min.x, this.area.Center.y),
@@ -347,22 +381,24 @@ namespace OBLib.QuadTree
 		}
 
 
-		public List<QuadTree_TrackedObj<T>> Search(Rectangle search_area)
+		public List<QuadTree_TrackedObj<T>> Search(Rectangle search_area, int curr_depth)
 		{
+			Stats.max_depth = Math.Max(Stats.max_depth, curr_depth);
 			List<QuadTree_TrackedObj<T>> result = new List<QuadTree_TrackedObj<T>>();
 
 			if (IsSubdivided)
 			{
 				foreach (var c_subquad in subQuads)
 				{
-					Stats.search_iterations++;
+					Stats.subquad_iterations++;
+					// TODO: the contains and intersects check are similar enough that I can do them together, and save some computations power
 					if (search_area.Contains(c_subquad.area))
 					{
 						result.AddRange(c_subquad.All_Elements);
 					}
 					else if (search_area.Intersects(c_subquad.area))
 					{
-						List<QuadTree_TrackedObj<T>> recursive_search = c_subquad.Search(search_area);
+						List<QuadTree_TrackedObj<T>> recursive_search = c_subquad.Search(search_area, curr_depth + 1);
 						if (recursive_search != null && recursive_search.Count > 0)
 						{
 							result.AddRange(recursive_search);
@@ -373,7 +409,7 @@ namespace OBLib.QuadTree
 
 			foreach (var c_elem in this.node_elements)
 			{
-				Stats.search_iterations++;
+				Stats.node_iterations++;
 				if (search_area.Intersects(c_elem.position, c_elem.radius))
 				{
 					result.Add(c_elem);
@@ -487,10 +523,10 @@ namespace OBLib.QuadTree
 
 		public IEnumerable<T> Search(Rectangle search_area)
 		{
-			Stats.search_iterations = 0;
+			Stats.ResetStats(); 
 
-			var result = this.root.Search(search_area);
-			Debug.Log(Stats.search_iterations);
+			var result = this.root.Search(search_area, 0);
+			Debug.Log(Stats.ToString());
 
 			return result?.Select(elem => elem.value);
 		}
