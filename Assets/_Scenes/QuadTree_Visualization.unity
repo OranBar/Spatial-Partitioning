@@ -367,7 +367,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 9999, y: 9999}
+  m_Size: {x: 999999, y: 999999}
   m_EdgeRadius: 0
 --- !u!114 &650938548
 MonoBehaviour:
@@ -381,8 +381,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c65e34a5a8cc334f84d1741d9341a91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawn_on_start: 1
-  objs_to_spawn: 100
+  spawn_on_start: 0
+  objs_to_spawn: 1000
   obj_prefab: {fileID: 8702722825156357185, guid: 1737c29adc5d24140b3fa9646addcdcb, type: 3}
   last_spawn_time: 0
   spawn_cooldown: 0.2

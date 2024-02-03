@@ -4,21 +4,34 @@ using System.Diagnostics;
 using NaughtyAttributes;
 using UnityEngine;
 
+public class GameObjectPositionGetter : ISparseGrid_ElementOperations<GameObject>
+{
+    public Vector3 GetPosition(GameObject obj)
+    {
+        return obj.transform.position;
+    }
+    
+    public Bounds GetBoundingBox(GameObject obj){
+        return default;
+    }
+}
+
 public class SparseGridTester : MonoBehaviour
 {
     [Auto]
     private ObjectsSpawner spawner;
-    private SparseGrid sparse_grid;
+    private SparseGrid<GameObject>sparse_grid;
     [Auto]
     private BoxCollider spawnArea;
     [Auto]
 
+    public int grid_cell_size;
     public bool activate_search;
     public Collider search_collider;
 
     void Awake()
     {
-        sparse_grid = new SparseGrid();
+        sparse_grid = new SparseGrid<GameObject>(grid_cell_size, new GameObjectPositionGetter());
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToGrid;
     }
@@ -61,8 +74,9 @@ public class SparseGridTester : MonoBehaviour
             search_time_measurements.RemoveAt(0);
         }
         search_time_measurements.Add(sw.ElapsedMilliseconds);
+        UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
+        UnityEngine.Debug.Log($"Cell iters = {sparse_grid.cell_iterations} | Element iters = {sparse_grid.element_iterations}");
         return prev_search_results;
-        // UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
     }
 
     private void ClearPrevSearchColors(){

@@ -15,6 +15,7 @@ public class ObjectsSpawner : MonoBehaviour
 
     [Auto]
     private Collider spawnArea;
+    // private BoxCollider2D spawnArea;
 
     void Start(){
         if(spawn_on_start){
