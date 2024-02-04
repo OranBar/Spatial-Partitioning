@@ -30,9 +30,7 @@ public class SparseGrid<T>
 
 
     public Dictionary<Vector3, SparseGridCell<T>> grid;
-    public int cell_iterations;
-    public int element_iterations;
-    private int grid_cell_size = 10;
+    private int grid_cell_size;
     private ISparseGrid_ElementOperations<T> element_operations;
 
     // public Vector3 min_bounds = Vector3.zero;
@@ -40,6 +38,12 @@ public class SparseGrid<T>
 
     // private const int grid_cell_size = 1; 
     // private const int grid_cell_size = 10000; 
+
+
+    public int cells_checked_iterations;
+    public int element_iterations;
+    public int intersecting_cells_iterations;
+    public int contained_cells_iterations;
 
     public SparseGrid(int grid_cell_size, ISparseGrid_ElementOperations<T> obj_position_getter)
     {
@@ -120,32 +124,45 @@ public class SparseGrid<T>
     public List<T> Search(Bounds search_area){
         List<T> result = new List<T>();
 
-        cell_iterations = 0;
+        cells_checked_iterations = 0;
         element_iterations = 0;
+        intersecting_cells_iterations = 0;
+        contained_cells_iterations = 0;
+
 
         // List<SparseGridCell> cells_to_check = new List<SparseGridCell>();
         Vector3 min_cell = GetCellKey_ForPosition(search_area.min);
         Vector3 max_cell = GetCellKey_ForPosition(search_area.max);
         for (int x = (int) min_cell.x; x <= (int) max_cell.x; x++){
+            bool x_edge = x == min_cell.x || x == max_cell.x;
+
             for (int y = (int) min_cell.y; y <= (int) max_cell.y; y++){
+                bool y_edge = y == min_cell.y || y == max_cell.y;
+
                 for (int z = (int) min_cell.z; z <= (int) max_cell.z; z++){
-                    cell_iterations++;
+                    cells_checked_iterations++;
 
                     Vector3 curr_key = new Vector3(x, y, z); 
                     if(grid.ContainsKey(curr_key)){
                         // TODO: If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
 
                         // I think this condition is true on 1st and last iteration of every loop, and false otherwise
-                        bool cell_intersects_search_area = 
-                           x == min_cell.x || x == max_cell.x ||
-                           y == min_cell.y || y == max_cell.y ||
-                           z == min_cell.z || z == max_cell.z;
+                        // bool cell_intersects_search_area = 
+                        //    x == min_cell.x || x == max_cell.x ||
+                        //    y == min_cell.y || y == max_cell.y ||
+                        //    z == min_cell.z || z == max_cell.z;
+
+
+                        bool z_edge = z == min_cell.z || z == max_cell.z;
+                        bool cell_intersects_search_area = x_edge || y_edge || z_edge;
 
                         // if(grid[curr_key].bounds.Intersects(search_area) == false){
                         //     // If we're not intersecting, we're fully contained
                         //     result.AddRange(grid[curr_key].elements);
-                        if (cell_intersects_search_area)
+                        // if (cell_intersects_search_area)
+                        if(cell_intersects_search_area)
                         {
+                            intersecting_cells_iterations++;
                             // We're intersecting, so we need to check which elements from this grid cell are actually inside the serach area
                             foreach (var c_elem in grid[curr_key].elements)
                             {
@@ -159,6 +176,7 @@ public class SparseGrid<T>
                         }
                         else
                         {
+                            contained_cells_iterations++;
                             // Since the search area fully contains the cell, we can just add all of the elements without additional checks
                             result.AddRange(grid[curr_key].elements);
                         }

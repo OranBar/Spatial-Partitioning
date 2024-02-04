@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -34,6 +35,9 @@ public class SparseGridTester : MonoBehaviour
         sparse_grid = new SparseGrid<GameObject>(grid_cell_size, new GameObjectPositionGetter());
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToGrid;
+        foreach(Transform child in this.transform){
+            AddSpawnedObj_ToGrid(child.gameObject);
+        }
     }
 
     void AddSpawnedObj_ToGrid(GameObject obj){
@@ -50,6 +54,9 @@ public class SparseGridTester : MonoBehaviour
     }
     
     List<long> search_time_measurements = new List<long>();
+    public double search_time_average = 0;
+    // [ShowNativeProperty]
+    // public double Search_Time_Average => search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
     private List<GameObject> prev_search_results = new List<GameObject>();
     
     private List<GameObject> SparseGridSearch()
@@ -70,12 +77,13 @@ public class SparseGridTester : MonoBehaviour
         }
 
         sw.Stop();
-        if(search_time_measurements.Count >= 60){
+        while(search_time_measurements.Count >= 60){
             search_time_measurements.RemoveAt(0);
         }
         search_time_measurements.Add(sw.ElapsedMilliseconds);
+        search_time_average = search_time_measurements.IsNullOrEmpty() ? 0 : search_time_measurements.Average();
         UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
-        UnityEngine.Debug.Log($"Cell iters = {sparse_grid.cell_iterations} | Element iters = {sparse_grid.element_iterations} | Elements Found {prev_search_results.Count}");
+        UnityEngine.Debug.Log($"Cell iters = {sparse_grid.cells_checked_iterations} | Element iters = {sparse_grid.element_iterations} | Elements Found {prev_search_results.Count} | Intersecting Cells {sparse_grid.intersecting_cells_iterations} | Contained Cells {sparse_grid.contained_cells_iterations}");
         return prev_search_results;
     }
 
