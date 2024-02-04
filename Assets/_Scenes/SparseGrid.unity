@@ -421,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48829f727f73adc479b5e01cdeedd19a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid_cell_size: 0
+  grid_cell_size: 1
   activate_search: 1
   search_collider: {fileID: 2128934487}
 --- !u!1 &2128934486

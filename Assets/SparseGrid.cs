@@ -135,12 +135,32 @@ public class SparseGrid<T>
                     if(grid.ContainsKey(curr_key)){
                         // TODO: If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
 
-                        foreach(var c_elem in grid[curr_key].elements){
-                            element_iterations++;
-                            Vector3 c_elem_position = element_operations.GetPosition(c_elem);
-                            if(search_area.Contains( c_elem_position )){
-                                result.Add(c_elem);
+                        // I think this condition is true on 1st and last iteration of every loop, and false otherwise
+                        bool cell_intersects_search_area = 
+                           x == min_cell.x || x == max_cell.x ||
+                           y == min_cell.y || y == max_cell.y ||
+                           z == min_cell.z || z == max_cell.z;
+
+                        // if(grid[curr_key].bounds.Intersects(search_area) == false){
+                        //     // If we're not intersecting, we're fully contained
+                        //     result.AddRange(grid[curr_key].elements);
+                        if (cell_intersects_search_area)
+                        {
+                            // We're intersecting, so we need to check which elements from this grid cell are actually inside the serach area
+                            foreach (var c_elem in grid[curr_key].elements)
+                            {
+                                element_iterations++;
+                                Vector3 c_elem_position = element_operations.GetPosition(c_elem);
+                                if (search_area.Contains(c_elem_position))
+                                {
+                                    result.Add(c_elem);
+                                }
                             }
+                        }
+                        else
+                        {
+                            // Since the search area fully contains the cell, we can just add all of the elements without additional checks
+                            result.AddRange(grid[curr_key].elements);
                         }
                     }
 

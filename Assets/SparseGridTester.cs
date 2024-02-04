@@ -20,7 +20,7 @@ public class SparseGridTester : MonoBehaviour
 {
     [Auto]
     private ObjectsSpawner spawner;
-    private SparseGridTwoLayers<GameObject> sparse_grid;
+    private SparseGrid<GameObject> sparse_grid;
     [Auto]
     private BoxCollider spawnArea;
     [Auto]
@@ -31,14 +31,14 @@ public class SparseGridTester : MonoBehaviour
 
     void Awake()
     {
-        sparse_grid = new SparseGridTwoLayers<GameObject>(grid_cell_size, new GameObjectPositionGetter());
+        sparse_grid = new SparseGrid<GameObject>(grid_cell_size, new GameObjectPositionGetter());
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToGrid;
     }
 
     void AddSpawnedObj_ToGrid(GameObject obj){
         UnityEngine.Debug.Log("Add Spawned Obj");
-        sparse_grid.Add(obj, obj.transform.position);
+        sparse_grid.Add(obj);
     }
     
         public void Update(){
@@ -75,7 +75,7 @@ public class SparseGridTester : MonoBehaviour
         }
         search_time_measurements.Add(sw.ElapsedMilliseconds);
         UnityEngine.Debug.Log("Linear Search: " + sw.Elapsed);
-        UnityEngine.Debug.Log($"Cell iters = {sparse_grid.cell_iterations} | Element iters = {sparse_grid.element_iterations}");
+        UnityEngine.Debug.Log($"Cell iters = {sparse_grid.cell_iterations} | Element iters = {sparse_grid.element_iterations} | Elements Found {prev_search_results.Count}");
         return prev_search_results;
     }
 
