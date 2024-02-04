@@ -123,4 +123,18 @@ public class SparseGridTester : MonoBehaviour
     public void TestSearch(){
         // var results = QuadTreeSearch();
     }
+
+    public bool draw_cubes = false;
+    void OnDrawGizmos(){
+        if(draw_cubes == false){
+            return;
+        }
+        if(sparse_grid?.grid == null){
+            return;
+        }
+        Gizmos.color = Color.yellow;
+        foreach(var c_cell in sparse_grid.grid.Values){
+            Gizmos.DrawWireCube(c_cell.bounds.center, c_cell.bounds.size);
+        }
+    }
 }

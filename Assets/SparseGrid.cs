@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Scripting;
 
 public interface ISparseGrid_ElementOperations<T>{
     Vector3 GetPosition(T obj);
@@ -21,11 +22,44 @@ public class SparseGridCell<T> {
         );
     }
     
+    // public bool Search(Bounds search_area, List<T> result){
+    //     bool z_edge = z == min_cell.z || z == max_cell.z;
+    //     bool cell_intersects_search_area = x_edge || y_edge || z_edge;
+
+    //     // if(grid[curr_key].bounds.Intersects(search_area) == false){
+    //     //     // If we're not intersecting, we're fully contained
+    //     //     result.AddRange(grid[curr_key].elements);
+    //     // if (cell_intersects_search_area)
+    //     if(cell_intersects_search_area)
+    //     {
+    //         intersecting_cells_iterations++;
+    //         // We're intersecting, so we need to check which elements from this grid cell are actually inside the serach area
+    //         foreach (var c_elem in grid[curr_key].elements)
+    //         {
+    //             element_iterations++;
+    //             Vector3 c_elem_position = element_operations.GetPosition(c_elem);
+    //             if (search_area.Contains(c_elem_position))
+    //             {
+    //                 result.Add(c_elem);
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //     //  If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
+    //         contained_cells_iterations++;
+    //         result.AddRange(grid[curr_key].elements);
+    //     }
+    //     return false;
+    // }
+    
+}
 
 public class SparseGrid<T>
 {
     public Dictionary<Vector3, SparseGridCell<T>> grid;
     private int grid_cell_size;
+    private float half_grid_cell_size;
     private ISparseGrid_ElementOperations<T> element_operations;
 
     public int cells_checked_iterations;
@@ -37,6 +71,7 @@ public class SparseGrid<T>
     {
         this.grid = new Dictionary<Vector3, SparseGridCell<T>>();
         this.grid_cell_size = grid_cell_size;
+        this.half_grid_cell_size = grid_cell_size * 0.5f;
         this.element_operations = obj_position_getter;
     }
 
@@ -44,11 +79,28 @@ public class SparseGrid<T>
         Vector3 obj_pos = element_operations.GetPosition(obj_to_add);
         Vector3 obj_grid_cell = GetCellKey_ForPosition(obj_pos);
 
+
         if(grid.ContainsKey(obj_grid_cell) == false){
-            grid[obj_grid_cell] = new SparseGridCell<T>(
-                obj_grid_cell * grid_cell_size, 
-                grid_cell_size
-            );
+            Vector3 center = obj_grid_cell * grid_cell_size; 
+            // if(center.x > 0){
+            //     center.x = center.x - half_grid_cell_size;
+            // } else if(center.x < 0){
+            //     center.x = center.x + half_grid_cell_size;
+            // }
+            // if(center.y > 0){
+            //     center.y = center.y - half_grid_cell_size;
+            // } else if(center.y < 0){
+            //     center.y = center.y + half_grid_cell_size;
+            // }
+            
+            // if(center.z > 0){
+            //     center.z = center.z - half_grid_cell_size;
+            // } else if(center.z < 0){
+            //     center.z = center.z + half_grid_cell_size;
+            // }
+            // new Vector3(grid_cell_size, grid_cell_size, grid_cell_size);
+
+            grid[obj_grid_cell] = new SparseGridCell<T>( center, grid_cell_size );
         }
 
         grid[obj_grid_cell].elements.Add(obj_to_add);
@@ -67,13 +119,65 @@ public class SparseGrid<T>
         // Goddamit, this is easy, but when removing, we'll have a super tough time updating this number!
     }
     
+    // 2 = -2 => 0  
+    // 9 = -9 => 0
+    // (-10, 10) => 0
+
+    // 12 != -12 => 1(!= -1)  
+    // 39 = -39 => 3(!= -3)
+
+    // 2 - 5 = -2 - 5 => 0  
+    // 9 = -9 => 0
+    // (-10, 10) => 0
+
     private Vector3 GetCellKey_ForPosition(Vector3 pos){
-        return new Vector3(
-            (int)(pos.x / grid_cell_size),
-            (int)(pos.y / grid_cell_size),
-            (int)(pos.z / grid_cell_size)
-        );
+        int x;
+        if(pos.x > 0){
+            x = (int) (pos.x + half_grid_cell_size) / grid_cell_size;
+        } else if(pos.x < 0){
+            x = (int) (pos.x - half_grid_cell_size) / grid_cell_size;
+        } else {
+            x = 0;
+        }
+
+        int y;
+        if(pos.y > 0){
+            y = (int) (pos.y + half_grid_cell_size) / grid_cell_size;
+        } else if(pos.y < 0){
+            y = (int) (pos.y - half_grid_cell_size) / grid_cell_size;
+        } else {
+            y = 0;
+        }
+
+        int z;
+        if(pos.z > 0){
+            z = (int) (pos.z + half_grid_cell_size) / grid_cell_size;
+        } else if(pos.z < 0){
+            z = (int) (pos.z - half_grid_cell_size) / grid_cell_size;
+        } else {
+            z = 0;
+        }
+        
+        return new Vector3(x, y, z);
     }
+
+    // TODO: The reason this is broken, is because zero doesn't have a positive and/or a negative, while all other numbers do. This breaks my formula logic for getting positions when the result is 0
+    // private Vector3 GetCellKey_ForPosition(Vector3 pos){
+    //     return new Vector3(
+    //         (int)((pos.x - half_grid_cell_size) / grid_cell_size),
+    //         (int)((pos.y - half_grid_cell_size) / grid_cell_size),
+    //         (int)((pos.z - half_grid_cell_size) / grid_cell_size)
+    //     );
+    // }
+
+    // private Vector3 GetCellKey_ForPosition(Vector3 pos){
+    //     float half_grid_size = grid_cell_size * 0.5f;
+    //     return new Vector3(
+    //         (int)((pos.x - half_grid_size) / grid_cell_size),
+    //         (int)((pos.y - half_grid_size) / grid_cell_size),
+    //         (int)((pos.z - half_grid_size) / grid_cell_size)
+    //     );
+    // }
 
 
     public SparseGridCell<T> GetGridCell(T obj)
@@ -168,6 +272,10 @@ public class SparseGrid<T>
             }
         }
         return result;
+    }
+        
+    public void Search_FullyContained_Cells(Bounds search_area){
+
     }
 
     
