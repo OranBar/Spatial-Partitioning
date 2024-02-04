@@ -144,7 +144,6 @@ public class SparseGrid<T>
 
                     Vector3 curr_key = new Vector3(x, y, z); 
                     if(grid.ContainsKey(curr_key)){
-                        // TODO: If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
 
                         // I think this condition is true on 1st and last iteration of every loop, and false otherwise
                         // bool cell_intersects_search_area = 
@@ -176,8 +175,8 @@ public class SparseGrid<T>
                         }
                         else
                         {
+                        //  If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
                             contained_cells_iterations++;
-                            // Since the search area fully contains the cell, we can just add all of the elements without additional checks
                             result.AddRange(grid[curr_key].elements);
                         }
                     }
