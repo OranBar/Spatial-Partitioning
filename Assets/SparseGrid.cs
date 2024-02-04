@@ -9,9 +9,7 @@ public interface ISparseGrid_ElementOperations<T>{
     Bounds GetBoundingBox(T obj);
 }
 
-public class SparseGrid<T>
-{
-    public class SparseGridCell {
+public class SparseGridCell<T> {
         public List<T> elements;
         public Bounds bounds;
 
@@ -26,34 +24,40 @@ public class SparseGrid<T>
         
     }
 
+public class SparseGrid<T>
+{
+    
 
-    public Dictionary<Vector3, SparseGridCell> grid;
+
+    public Dictionary<Vector3, SparseGridCell<T>> grid;
     public int cell_iterations;
     public int element_iterations;
     private int grid_cell_size = 10;
     private ISparseGrid_ElementOperations<T> element_operations;
 
-    public Vector3 min_bounds = Vector3.zero;
-    public Vector3 max_bounds = Vector3.zero;
+    // public Vector3 min_bounds = Vector3.zero;
+    // public Vector3 max_bounds = Vector3.zero;
 
     // private const int grid_cell_size = 1; 
     // private const int grid_cell_size = 10000; 
 
     public SparseGrid(int grid_cell_size, ISparseGrid_ElementOperations<T> obj_position_getter)
     {
-        this.grid = new Dictionary<Vector3, SparseGridCell>();
+        this.grid = new Dictionary<Vector3, SparseGridCell<T>>();
         this.grid_cell_size = grid_cell_size;
         this.element_operations = obj_position_getter;
     }
 
-    public void Add(T obj_to_add, Vector3 pos){
-        Vector3 obj_grid_cell = GetCellKey_ForPosition(pos);
+    public SparseGridCell<T> Add(T obj_to_add){
+        Vector3 obj_pos = element_operations.GetPosition(obj_to_add);
+        Vector3 obj_grid_cell = GetCellKey_ForPosition(obj_pos);
 
         if(grid.ContainsKey(obj_grid_cell) == false){
-            grid[obj_grid_cell] = new SparseGridCell(pos, grid_cell_size);
+            grid[obj_grid_cell] = new SparseGridCell<T>(obj_pos, grid_cell_size);
         }
 
         grid[obj_grid_cell].elements.Add(obj_to_add);
+        return grid[obj_grid_cell];
 
         // Bounds obj_bounds = this.element_operations.GetBoundingBox(obj_to_add);
         
@@ -77,13 +81,28 @@ public class SparseGrid<T>
     }
 
 
-    private SparseGridCell GetGridCell(Vector3 pos)
+    public SparseGridCell<T> GetGridCell(T obj)
+    {
+        return GetGridCell(this.element_operations.GetPosition(obj));
+        // Vector3 cell_key = GetCellKey_ForPosition(pos);
+        // return grid[cell_key];
+    }
+
+    public SparseGridCell<T> GetGridCell(Vector3 pos)
     {
         Vector3 cell_key = GetCellKey_ForPosition(pos);
-        return grid[cell_key];
+        SparseGridCell<T> result = null;
+        grid.TryGetValue(cell_key, out result);
+
+        return result;
     }
     
-    public void Remove(T obj_to_remove, Vector3 pos){
+    public SparseGridCell<T> Remove(T obj_to_remove){
+        Vector3 obj_pos = this.element_operations.GetPosition(obj_to_remove);
+        return Remove(obj_to_remove, obj_pos);
+    }
+
+    public SparseGridCell<T> Remove(T obj_to_remove, Vector3 pos){
         Vector3 obj_grid_cell = GetCellKey_ForPosition(pos);
 
         if(grid[obj_grid_cell] == null){
@@ -91,6 +110,8 @@ public class SparseGrid<T>
         }
 
         grid[obj_grid_cell].elements.Remove(obj_to_remove);
+
+        return grid[obj_grid_cell];
     }
     
     // Performance-Upgrade: If we keep a min and a max elmeent that define the max bounds of your grid, we can immediately discard all cells outside our bounds, and drastically reduce search queries for areas that are very large.

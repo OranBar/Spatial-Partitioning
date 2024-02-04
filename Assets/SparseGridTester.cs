@@ -20,7 +20,7 @@ public class SparseGridTester : MonoBehaviour
 {
     [Auto]
     private ObjectsSpawner spawner;
-    private SparseGrid<GameObject>sparse_grid;
+    private SparseGridTwoLayers<GameObject> sparse_grid;
     [Auto]
     private BoxCollider spawnArea;
     [Auto]
@@ -31,7 +31,7 @@ public class SparseGridTester : MonoBehaviour
 
     void Awake()
     {
-        sparse_grid = new SparseGrid<GameObject>(grid_cell_size, new GameObjectPositionGetter());
+        sparse_grid = new SparseGridTwoLayers<GameObject>(grid_cell_size, new GameObjectPositionGetter());
 
         spawner.OnObjectSpawned += AddSpawnedObj_ToGrid;
     }
