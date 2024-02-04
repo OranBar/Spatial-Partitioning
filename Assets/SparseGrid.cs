@@ -1,8 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Tilemaps;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 public interface ISparseGrid_ElementOperations<T>{
     Vector3 GetPosition(T obj);
@@ -10,35 +9,24 @@ public interface ISparseGrid_ElementOperations<T>{
 }
 
 public class SparseGridCell<T> {
-        public List<T> elements;
-        public Bounds bounds;
+    public List<T> elements;
+    public Bounds bounds;
 
-        public SparseGridCell(Vector3 center, int grid_cell_size)
-        {
-            elements = new List<T>();
-            bounds = new Bounds(
-                center, 
-                Vector3.one * grid_cell_size
-            );
-        }
-        
+    public SparseGridCell(Vector3 center, int grid_cell_size)
+    {
+        elements = new List<T>();
+        bounds = new Bounds(
+            center, 
+            Vector3.one * grid_cell_size
+        );
     }
+    
 
 public class SparseGrid<T>
 {
-    
-
-
     public Dictionary<Vector3, SparseGridCell<T>> grid;
     private int grid_cell_size;
     private ISparseGrid_ElementOperations<T> element_operations;
-
-    // public Vector3 min_bounds = Vector3.zero;
-    // public Vector3 max_bounds = Vector3.zero;
-
-    // private const int grid_cell_size = 1; 
-    // private const int grid_cell_size = 10000; 
-
 
     public int cells_checked_iterations;
     public int element_iterations;
@@ -57,7 +45,10 @@ public class SparseGrid<T>
         Vector3 obj_grid_cell = GetCellKey_ForPosition(obj_pos);
 
         if(grid.ContainsKey(obj_grid_cell) == false){
-            grid[obj_grid_cell] = new SparseGridCell<T>(obj_pos, grid_cell_size);
+            grid[obj_grid_cell] = new SparseGridCell<T>(
+                obj_grid_cell * grid_cell_size, 
+                grid_cell_size
+            );
         }
 
         grid[obj_grid_cell].elements.Add(obj_to_add);
@@ -88,8 +79,6 @@ public class SparseGrid<T>
     public SparseGridCell<T> GetGridCell(T obj)
     {
         return GetGridCell(this.element_operations.GetPosition(obj));
-        // Vector3 cell_key = GetCellKey_ForPosition(pos);
-        // return grid[cell_key];
     }
 
     public SparseGridCell<T> GetGridCell(Vector3 pos)
@@ -146,12 +135,6 @@ public class SparseGrid<T>
                     if(grid.ContainsKey(curr_key)){
 
                         // I think this condition is true on 1st and last iteration of every loop, and false otherwise
-                        // bool cell_intersects_search_area = 
-                        //    x == min_cell.x || x == max_cell.x ||
-                        //    y == min_cell.y || y == max_cell.y ||
-                        //    z == min_cell.z || z == max_cell.z;
-
-
                         bool z_edge = z == min_cell.z || z == max_cell.z;
                         bool cell_intersects_search_area = x_edge || y_edge || z_edge;
 
