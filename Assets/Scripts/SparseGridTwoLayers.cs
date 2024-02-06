@@ -33,7 +33,7 @@ public class SparseGridTwoLayers<T>
     private SparseGrid<T> high_res_sparse_grid;
     private ISparseGrid_ElementOperations<T> high_res_grid_operations;
     private LowRes_SparseGridCell_ElementOperation<T> low_res_grid_operations;
-    private int max_elements_low_res = 30;
+    // private int max_elements_low_res = 30;
 
 
     public SparseGridTwoLayers(int smallest_cell_size, ISparseGrid_ElementOperations<T> sparse_grid_operations)
@@ -77,11 +77,24 @@ public class SparseGridTwoLayers<T>
         List<SparseGridCell<T>> cells_to_check = low_res_sparse_grid.Search(search_area);
 
         foreach(var c_cell in cells_to_check){
-            foreach(var c_elem in c_cell.elements){
-                // Bounds c_elem_bounds = this.high_res_grid_operations.GetBoundingBox(c_elem);
-                Vector3 c_elem_pos = this.high_res_grid_operations.GetPosition(c_elem);
-                if(search_area.Contains(c_elem_pos)){
-                    search_result.Add(c_elem); 
+            // If we're not intersecting, I'm assuming it means it's fully contained.
+            // We wouldn't be iterating on it if it didn't contain at least 1 element, meaning they can't/shouldn't be disjointed
+            bool is_cell_fully_contained_in_search_area = search_area.Intersects(c_cell.bounds) == false;
+
+            is_cell_fully_contained_in_search_area = false;
+            
+            if(is_cell_fully_contained_in_search_area){
+                
+                search_result.AddRange(c_cell.elements);
+                
+            } else {
+
+                foreach(var c_elem in c_cell.elements){
+                    // Bounds c_elem_bounds = this.high_res_grid_operations.GetBoundingBox(c_elem);
+                    Vector3 c_elem_pos = this.high_res_grid_operations.GetPosition(c_elem);
+                    if(search_area.Contains(c_elem_pos)){
+                        search_result.Add(c_elem); 
+                    }
                 }
             }
         }
