@@ -211,6 +211,41 @@ public class SparseGrid<T>
         return grid[obj_grid_cell];
     }
     
+    public struct SparseGridIterationParams {
+        public Vector3 cell_key;
+        public bool cell_intersects_search_area;
+
+        public SparseGridIterationParams(Vector3 curr_key, bool cell_intersects_search_area) : this()
+        {
+            this.cell_key = curr_key;
+            this.cell_intersects_search_area = cell_intersects_search_area;
+        }
+    }
+
+    public IEnumerable<SparseGridIterationParams> Get_Cells_In_Area(Bounds search_area){
+        Vector3 min_cell = GetCellKey_ForPosition(search_area.min);
+        Vector3 max_cell = GetCellKey_ForPosition(search_area.max);
+        for (int x = (int) min_cell.x; x <= (int) max_cell.x; x++){
+            bool x_edge = x == min_cell.x || x == max_cell.x;
+
+            for (int y = (int) min_cell.y; y <= (int) max_cell.y; y++){
+                bool y_edge = y == min_cell.y || y == max_cell.y;
+
+                for (int z = (int) min_cell.z; z <= (int) max_cell.z; z++){
+
+                    Vector3 curr_key = new Vector3(x, y, z); 
+                    if(grid.ContainsKey(curr_key)){
+                        bool z_edge = z == min_cell.z || z == max_cell.z;
+                        bool cell_intersects_search_area = x_edge || y_edge || z_edge;
+
+                        yield return new SparseGridIterationParams(curr_key, cell_intersects_search_area);
+                    }
+
+                }
+            }
+        }
+    }
+    
     // Performance-Upgrade: If we keep a min and a max elmeent that define the max bounds of your grid, we can immediately discard all cells outside our bounds, and drastically reduce search queries for areas that are very large.
     // If we don't, we'll have to check a ton of cells for big queries....  The upside is that they'll be empty
     // One thing we could do is intersect the bounds of all objects with the search area, and use the result when querying the grid cells, to avoid uncecessary calls 
@@ -223,54 +258,31 @@ public class SparseGrid<T>
         contained_cells_iterations = 0;
 
 
-        // List<SparseGridCell> cells_to_check = new List<SparseGridCell>();
-        Vector3 min_cell = GetCellKey_ForPosition(search_area.min);
-        Vector3 max_cell = GetCellKey_ForPosition(search_area.max);
-        for (int x = (int) min_cell.x; x <= (int) max_cell.x; x++){
-            bool x_edge = x == min_cell.x || x == max_cell.x;
-
-            for (int y = (int) min_cell.y; y <= (int) max_cell.y; y++){
-                bool y_edge = y == min_cell.y || y == max_cell.y;
-
-                for (int z = (int) min_cell.z; z <= (int) max_cell.z; z++){
-                    cells_checked_iterations++;
-
-                    Vector3 curr_key = new Vector3(x, y, z); 
-                    if(grid.ContainsKey(curr_key)){
-
-                        // I think this condition is true on 1st and last iteration of every loop, and false otherwise
-                        bool z_edge = z == min_cell.z || z == max_cell.z;
-                        bool cell_intersects_search_area = x_edge || y_edge || z_edge;
-
-                        // if(grid[curr_key].bounds.Intersects(search_area) == false){
-                        //     // If we're not intersecting, we're fully contained
-                        //     result.AddRange(grid[curr_key].elements);
-                        // if (cell_intersects_search_area)
-                        if(cell_intersects_search_area)
-                        {
-                            intersecting_cells_iterations++;
-                            // We're intersecting, so we need to check which elements from this grid cell are actually inside the serach area
-                            foreach (var c_elem in grid[curr_key].elements)
-                            {
-                                element_iterations++;
-                                Vector3 c_elem_position = element_operations.GetPosition(c_elem);
-                                if (search_area.Contains(c_elem_position))
-                                {
-                                    result.Add(c_elem);
-                                }
-                            }
-                        }
-                        else
-                        {
-                        //  If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
-                            contained_cells_iterations++;
-                            result.AddRange(grid[curr_key].elements);
-                        }
+        foreach(var c_cell_params in Get_Cells_In_Area(search_area)){
+            cells_checked_iterations++;
+            
+            if(c_cell_params.cell_intersects_search_area)
+            {
+                intersecting_cells_iterations++;
+                // We're intersecting, so we need to check which elements from this grid cell are actually inside the serach area
+                foreach (var c_elem in grid[c_cell_params.cell_key].elements)
+                {
+                    element_iterations++;
+                    Vector3 c_elem_position = element_operations.GetPosition(c_elem);
+                    if (search_area.Contains(c_elem_position))
+                    {
+                        result.Add(c_elem);
                     }
-
                 }
             }
+            else
+            {
+            //  If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
+                contained_cells_iterations++;
+                result.AddRange(grid[c_cell_params.cell_key].elements);
+            }
         }
+        // List<SparseGridCell> cells_to_check = new List<SparseGridCell>();
         return result;
     }
         
