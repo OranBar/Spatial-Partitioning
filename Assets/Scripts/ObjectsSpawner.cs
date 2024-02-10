@@ -10,6 +10,9 @@ public class ObjectsSpawner : MonoBehaviour
     public bool spawn_on_start;
     public int objs_to_spawn;
     public GameObject obj_prefab;
+    public bool randomize_obj_size = false;
+    [MinMaxSlider(0.01f, 100f)]
+    public Vector2 obj_size_range;
 
     public event Action<GameObject> OnObjectSpawned = ( _ ) => { };
 
@@ -36,6 +39,11 @@ public class ObjectsSpawner : MonoBehaviour
     GameObject SpawnSingleObject(Vector3 targetPos)
     {
         GameObject new_go = Instantiate(obj_prefab, targetPos, Quaternion.identity, this.transform);
+        float rnd = UnityEngine.Random.Range(obj_size_range.x, obj_size_range.y);
+        if(randomize_obj_size){
+            Vector3 obj_scale = new Vector3(rnd, rnd, rnd);
+            new_go.transform.localScale = obj_scale;
+        }
         OnObjectSpawned.Invoke(new_go);
         last_spawn_time = Time.time;
         return new_go;
