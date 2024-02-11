@@ -76,7 +76,7 @@ public class SparseGridTwoLayers<T>
         search_result.Clear();
 
         // TODO: Search by checking low_res grid, then follow up to the high_res from the references in the low_res. Do not access high_res directly
-        List<SparseGridCell<T>> cells_to_check = low_res_sparse_grid.Search(search_area);
+        HashSet<SparseGridCell<T>> cells_to_check = low_res_sparse_grid.Search(search_area);
 
         foreach(var c_cell in cells_to_check){
             // If we're not intersecting, I'm assuming it means it's fully contained.

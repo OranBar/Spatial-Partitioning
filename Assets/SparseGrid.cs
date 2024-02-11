@@ -267,8 +267,8 @@ public class SparseGrid<T>
     // Performance-Upgrade: If we keep a min and a max elmeent that define the max bounds of your grid, we can immediately discard all cells outside our bounds, and drastically reduce search queries for areas that are very large.
     // If we don't, we'll have to check a ton of cells for big queries....  The upside is that they'll be empty
     // One thing we could do is intersect the bounds of all objects with the search area, and use the result when querying the grid cells, to avoid uncecessary calls 
-    public List<T> Search(Bounds search_area){
-        List<T> result = new List<T>();
+    public HashSet<T> Search(Bounds search_area){
+        HashSet<T> result = new HashSet<T>();
 
         cells_checked_iterations = 0;
         element_iterations = 0;
@@ -290,8 +290,9 @@ public class SparseGrid<T>
                 foreach (var c_elem in grid[c_cell_params.cell_key].elements)
                 {
                     element_iterations++;
-                    Vector3 c_elem_position = element_operations.GetPosition(c_elem);
-                    if (search_area.Contains(c_elem_position))
+                    Bounds c_elem_bounds = element_operations.GetBoundingBox(c_elem);
+                    // if (search_area.Contains(c_elem_position))
+                    if(search_area.Intersects(c_elem_bounds))
                     {
                         result.Add(c_elem);
                     }
@@ -301,7 +302,8 @@ public class SparseGrid<T>
             {
             //  If the cell we are looking at is fully contained in the search_area, we can add all elements of the cells without doing the Contains check
                 contained_cells_iterations++;
-                result.AddRange(grid[c_cell_params.cell_key].elements);
+                result.UnionWith(grid[c_cell_params.cell_key].elements);
+                // result.AddRange(grid[c_cell_params.cell_key].elements);
             }
         }
         return result;
