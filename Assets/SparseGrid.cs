@@ -75,13 +75,33 @@ public class SparseGrid<T>
         this.element_operations = obj_position_getter;
     }
 
-    public SparseGridCell<T> Add(T obj_to_add){
-        Vector3 obj_pos = element_operations.GetPosition(obj_to_add);
-        Vector3 obj_grid_cell = GetCellKey_ForPosition(obj_pos);
+    private List<SparseGridCell<T>> add_result = new List<SparseGridCell<T>>();
+
+    public List<SparseGridCell<T>> Add(T obj_to_add){
+        add_result.Clear();
+        Bounds obj_bounds = this.element_operations.GetBoundingBox(obj_to_add);
+
+        HashSet<SparseGridCell<T>> result = new HashSet<SparseGridCell<T>>();
+        foreach(var c_cell_params in Get_Cells_In_Area(obj_bounds)){
+            if (grid.ContainsKey(c_cell_params.cell_key) == false)
+            {
+                Vector3 center = c_cell_params.cell_key * grid_cell_size;
+                
+                grid[c_cell_params.cell_key] = new SparseGridCell<T>( center, grid_cell_size );
+            }
+            
+            grid[c_cell_params.cell_key].elements.Add(obj_to_add);
+            result.Add(grid[c_cell_params.cell_key]);
+        }
+
+        //TODO: Yeah, tolist is bad, but I do expect this list to never be more than 8 elements, 1 on average, so it's fine
+        return result.ToList();
+        // Vector3 obj_pos = element_operations.GetPosition(obj_to_add);
+        // Vector3 obj_grid_cell = GetCellKey_ForPosition(obj_pos);
 
 
-        if(grid.ContainsKey(obj_grid_cell) == false){
-            Vector3 center = obj_grid_cell * grid_cell_size; 
+        // if(grid.ContainsKey(obj_grid_cell) == false){
+            // Vector3 center = obj_grid_cell * grid_cell_size; 
             // if(center.x > 0){
             //     center.x = center.x - half_grid_cell_size;
             // } else if(center.x < 0){
@@ -100,11 +120,11 @@ public class SparseGrid<T>
             // }
             // new Vector3(grid_cell_size, grid_cell_size, grid_cell_size);
 
-            grid[obj_grid_cell] = new SparseGridCell<T>( center, grid_cell_size );
-        }
+            // grid[obj_grid_cell] = new SparseGridCell<T>( center, grid_cell_size );
+        // }
 
-        grid[obj_grid_cell].elements.Add(obj_to_add);
-        return grid[obj_grid_cell];
+        // grid[obj_grid_cell].elements.Add(obj_to_add);
+        // return grid[obj_grid_cell];
 
         // Bounds obj_bounds = this.element_operations.GetBoundingBox(obj_to_add);
         
@@ -234,12 +254,10 @@ public class SparseGrid<T>
                 for (int z = (int) min_cell.z; z <= (int) max_cell.z; z++){
 
                     Vector3 curr_key = new Vector3(x, y, z); 
-                    if(grid.ContainsKey(curr_key)){
-                        bool z_edge = z == min_cell.z || z == max_cell.z;
-                        bool cell_intersects_search_area = x_edge || y_edge || z_edge;
+                    bool z_edge = z == min_cell.z || z == max_cell.z;
+                    bool cell_intersects_search_area = x_edge || y_edge || z_edge;
 
-                        yield return new SparseGridIterationParams(curr_key, cell_intersects_search_area);
-                    }
+                    yield return new SparseGridIterationParams(curr_key, cell_intersects_search_area);
 
                 }
             }
@@ -260,6 +278,10 @@ public class SparseGrid<T>
 
         foreach(var c_cell_params in Get_Cells_In_Area(search_area)){
             cells_checked_iterations++;
+            if(grid.ContainsKey(c_cell_params.cell_key) == false){
+                continue;
+            }
+
             
             if(c_cell_params.cell_intersects_search_area)
             {
@@ -282,7 +304,6 @@ public class SparseGrid<T>
                 result.AddRange(grid[c_cell_params.cell_key].elements);
             }
         }
-        // List<SparseGridCell> cells_to_check = new List<SparseGridCell>();
         return result;
     }
         

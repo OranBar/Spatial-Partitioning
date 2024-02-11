@@ -47,8 +47,10 @@ public class SparseGridTwoLayers<T>
     
     public void Add(T obj){
 
-        SparseGridCell<T> cell_where_obj_was_added = high_res_sparse_grid.Add(obj);
-        low_res_sparse_grid.Add(cell_where_obj_was_added);
+        List<SparseGridCell<T>> cells_where_obj_was_added = high_res_sparse_grid.Add(obj);
+        foreach(var c_cell in cells_where_obj_was_added){
+            low_res_sparse_grid.Add(c_cell); 
+        }
         
         // SparseGridCell<T> grid_cell = low_res_sparse_grid.GetGridCell(obj);
         // if(grid_cell == null){

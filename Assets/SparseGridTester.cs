@@ -5,6 +5,10 @@ using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
+public class BoxCollidersCache{
+    public static Dictionary<GameObject, BoxCollider> obj_to_collider_map = new Dictionary<GameObject, BoxCollider>();
+}
+
 public class GameObjectPositionGetter : ISparseGrid_ElementOperations<GameObject>
 {
     public Vector3 GetPosition(GameObject obj)
@@ -13,7 +17,11 @@ public class GameObjectPositionGetter : ISparseGrid_ElementOperations<GameObject
     }
     
     public Bounds GetBoundingBox(GameObject obj){
-        return default;
+        Bounds value;
+        if(BoxCollidersCache.obj_to_collider_map.ContainsKey(obj) == false){
+            BoxCollidersCache.obj_to_collider_map[obj] = obj.GetComponent<BoxCollider>();
+        }
+        return BoxCollidersCache.obj_to_collider_map[obj].bounds;
     }
 }
 

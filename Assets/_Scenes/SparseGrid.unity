@@ -570,6 +570,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1934579129418007159, guid: f6eabf6097d46e845bcd39192594893c, type: 3}
+      propertyPath: obj_prefab
+      value: 
+      objectReference: {fileID: 7422481211135062963, guid: baa0c888d8731e74c800f0c404f3373d, type: 3}
+    - target: {fileID: 1934579129418007159, guid: f6eabf6097d46e845bcd39192594893c, type: 3}
       propertyPath: spawn_on_start
       value: 0
       objectReference: {fileID: 0}
@@ -1346,8 +1350,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawn_on_start: 1
-  objs_to_spawn: 1000
-  obj_prefab: {fileID: 7326429610034349179, guid: ab5906be9c00d29419d08b48b388cc7c, type: 3}
+  objs_to_spawn: 10
+  obj_prefab: {fileID: 7422481211135062963, guid: baa0c888d8731e74c800f0c404f3373d, type: 3}
   randomize_obj_size: 0
   obj_size_range: {x: 0.01, y: 20}
   last_spawn_time: 0
@@ -1378,7 +1382,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 100, y: 100, z: 100}
+  m_Size: {x: 10, y: 10, z: 10}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5200562954018881628
 GameObject:
