@@ -384,6 +384,8 @@ MonoBehaviour:
   spawn_on_start: 0
   objs_to_spawn: 1000
   obj_prefab: {fileID: 8702722825156357185, guid: 1737c29adc5d24140b3fa9646addcdcb, type: 3}
+  randomize_obj_size: 0
+  obj_size_range: {x: 0, y: 0}
   last_spawn_time: 0
   spawn_cooldown: 0.2
 --- !u!114 &650938549
@@ -606,7 +608,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1327714940}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.074424, y: -0.24991079, z: -9.958882}
+  m_LocalPosition: {x: 1.074424, y: -0.24991079, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

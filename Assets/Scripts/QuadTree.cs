@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
-// using VRageMath;
 
 
 namespace OBLib.QuadTree
@@ -40,11 +39,6 @@ namespace OBLib.QuadTree
 			return rslt;
 		}
     }
-	// If we save this pointer both in the quadtree and the list, then when this becomes null, it will become null in both containers. So I can remove by setting to null in the quadtree, and when I'll iterate, I can remove the nulls and prune/reshape the tree
-	// public class QuadTreeElementLocation
-	// {
-
-	// }
 
 	public class Rectangle
 	{
@@ -371,8 +365,6 @@ namespace OBLib.QuadTree
 					if (c_subquad.Add(c_elem))
 					{
 						this.node_elements.RemoveAt(i);
-						// TODO: this continue should continue the outer for, not the inner
-						// continue;
 						break;
 					}
 				}
