@@ -367,7 +367,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 999999, y: 999999}
+  m_Size: {x: 40, y: 30}
   m_EdgeRadius: 0
 --- !u!114 &650938548
 MonoBehaviour:
@@ -387,7 +387,7 @@ MonoBehaviour:
   randomize_obj_size: 0
   obj_size_range: {x: 0, y: 0}
   last_spawn_time: 0
-  spawn_cooldown: 0.2
+  spawn_cooldown: 0.04
 --- !u!114 &650938549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -598,7 +598,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2, y: 1}
+  m_Size: {x: 4, y: 0.8}
   m_EdgeRadius: 0
 --- !u!4 &1327714942
 Transform:

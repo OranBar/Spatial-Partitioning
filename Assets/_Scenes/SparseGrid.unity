@@ -1332,7 +1332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48829f727f73adc479b5e01cdeedd19a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid_cell_size: 1
+  grid_cell_size: 2
   activate_search: 1
   search_collider: {fileID: 2128934487}
   search_time_average: 0
@@ -1350,10 +1350,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawn_on_start: 1
-  objs_to_spawn: 10
+  objs_to_spawn: 100
   obj_prefab: {fileID: 7422481211135062963, guid: baa0c888d8731e74c800f0c404f3373d, type: 3}
-  randomize_obj_size: 0
-  obj_size_range: {x: 0.01, y: 20}
+  randomize_obj_size: 1
+  obj_size_range: {x: 0.2, y: 1}
   last_spawn_time: 0
   spawn_cooldown: 0.1
 --- !u!4 &5200562954018881625
@@ -1382,7 +1382,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 10, y: 10, z: 10}
+  m_Size: {x: 20, y: 20, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5200562954018881628
 GameObject:
@@ -1416,7 +1416,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb2fedd3f71451b4cb8d7bb25f3603f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid_cell_size: 1
+  grid_cell_size: 2
   activate_search: 0
   search_collider: {fileID: 2128934487}
   search_time_average: 0
